@@ -8,100 +8,104 @@
 #include <imgui_impl_win32.h>
 #include <tchar.h>
 
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 bool CreateDeviceD3D(HWND hWnd);
 void CleanupDeviceD3D();
 void CreateRenderTarget();
 void CleanupRenderTarget();
+
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+// global render state
 static ID3D11Device *g_pd3dDevice = NULL;
 static ID3D11DeviceContext *g_pd3dDeviceContext = NULL;
 static IDXGISwapChain *g_pSwapChain = NULL;
 static ID3D11RenderTargetView *g_mainRenderTargetView = NULL;
-IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-LRESULT CALLBACK window_procedure(HWND win, UINT msg, WPARAM p1, LPARAM p2) {
-    if (ImGui_ImplWin32_WndProcHandler(win, msg, p1, p2)) {
+// wndproc forwarder
+LRESULT CALLBACK window_procedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam)) {
         return 0;
     }
     if (msg == WM_DESTROY) {
         PostQuitMessage(0);
         return 0;
     }
-    return DefWindowProc(win, msg, p1, p2);
+    return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
 void MainThread() {
-    auto hwnd = FindWindowA(NULL, "Task Manager");
-    if (!hwnd) {
-        return;
-    }
+    auto tmgr = FindWindowA("TaskManagerWindow", "Task Manager");
+    if (!tmgr) return;
+    FILE *fp;
+    fopen_s(&fp, "D:\\log.txt", "a");
+    if (!fp) return;
 
-    ImGui_ImplWin32_EnableDpiAwareness();
-    // WNDCLASSEXW wc = {sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"Task Manager", NULL};
-    // try refactoring the code so that instead of using a newly made window, we modify the already existing `hwnd` to have the same attributes
-
-
-    WNDCLASSEXW wc{};
+    // create the window class for the new window
+    WNDCLASSEXA wc{};
     wc.cbSize = sizeof(wc);
     wc.style = CS_HREDRAW | CS_VREDRAW;
+    // current module
     wc.hInstance = GetModuleHandle(NULL);
-    wc.lpszClassName = L"baseq";
+    wc.lpszClassName = "baseq";
     wc.lpfnWndProc = window_procedure;
-    ::RegisterClassExW(&wc);
-    HWND overlay = CreateWindowExW(
+    ::RegisterClassExA(&wc);
+
+    HWND overlay = CreateWindowExA(
             WS_EX_TOPMOST | WS_EX_TRANSPARENT | WS_EX_LAYERED,
             wc.lpszClassName,
-            L"baseq",
+            "baseq",
             WS_POPUP,
             0,
             0,
             800,
             600,
-            nullptr,
-            nullptr,
+            NULL,
+            NULL,
             wc.hInstance,
-            nullptr);
-    SetLayeredWindowAttributes(overlay, RGB(0, 0, 0), BYTE(255), LWA_ALPHA);
+            NULL);
+    ::SetLayeredWindowAttributes(overlay, RGB(0, 0, 0), 0xff, LWA_ALPHA);
+
     {
         RECT client_area{};
-        GetClientRect(overlay, &client_area);
+        ::GetClientRect(overlay, &client_area);
         RECT window_area{};
-        GetWindowRect(overlay, &window_area);
+        ::GetWindowRect(overlay, &window_area);
         POINT diff{};
-        ClientToScreen(overlay, &diff);
+        ::ClientToScreen(overlay, &diff);
+        fclose(fp);
         MARGINS margins{
-                window_area.left + (diff.x - window_area.left),
-                window_area.top + (diff.y - window_area.top),
+                diff.x,
+                diff.y,
                 client_area.right,
                 client_area.bottom,
         };
-        DwmExtendFrameIntoClientArea(overlay, &margins);
+        ::DwmExtendFrameIntoClientArea(overlay, &margins);
     }
 
     if (!CreateDeviceD3D(overlay)) {
         CleanupDeviceD3D();
-        ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+        ::UnregisterClassA(wc.lpszClassName, wc.hInstance);
         return;
     }
 
-    ::ShowWindow(hwnd, SW_HIDE);
-    ::UpdateWindow(hwnd);
+    // hide task manager and show our overlay
+    ::ShowWindow(tmgr, SW_HIDE);
+    ::UpdateWindow(tmgr);
 
-    ShowWindow(overlay, SW_SHOW);
-    UpdateWindow(overlay);
+    ::ShowWindow(overlay, SW_SHOW);
+    ::UpdateWindow(overlay);
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
-    (void) io;
+    ImGui_ImplWin32_EnableDpiAwareness();
     ImGui::StyleColorsDark();
 
     ImGui_ImplWin32_Init(overlay);
-
     ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
 
     while (true) {
+        // listen for when we should stop
         bool done = false;
         MSG msg;
         while (::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE)) {
@@ -113,29 +117,31 @@ void MainThread() {
         if (done) {
             break;
         }
+
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
-        ImGui::Begin("Hello, world!");
-        ImGui::Text("This is some useful text.");
+        ImGui::Begin("baseq");
+        ImGui::Text("Loaded.");
         ImGui::End();
         ImGui::EndFrame();
         ImGui::Render();
+
         const float clear_color_with_alpha[4] = {0.f, 0.f, 0.f, 0.f};
         g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, NULL);
         g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, clear_color_with_alpha);
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-
-        g_pSwapChain->Present(1, 0);// Present with vsync
+        g_pSwapChain->Present(1, 0);
     }
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
     CleanupDeviceD3D();
-    //::DestroyWindow(hwnd);
-    ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+    ::UnregisterClassA(wc.lpszClassName, wc.hInstance);
 }
+
+// --- boilerplate ---
 
 DWORD WINAPI MainThreadWrapper(HMODULE module) {
     MainThread();
@@ -219,9 +225,6 @@ void CleanupRenderTarget() {
         g_mainRenderTargetView = NULL;
     }
 }
-
-// Forward declare message handler from imgui_impl_win32.cpp
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 // Win32 message handler
 // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
