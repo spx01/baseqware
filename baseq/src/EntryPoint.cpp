@@ -1,12 +1,19 @@
 #include <cstdio>
 
 #include <Windows.h>
+
+#include <Psapi.h>
+#include <Shlwapi.h>
 #include <d3d11.h>
 #include <dwmapi.h>
+#include <tchar.h>
+
 #include <imgui.h>
 #include <imgui_impl_dx11.h>
 #include <imgui_impl_win32.h>
-#include <tchar.h>
+
+#include "Cheat.h"
+#include "Util.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 bool CreateDeviceD3D(HWND hWnd);
@@ -35,26 +42,33 @@ LRESULT CALLBACK window_procedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
 }
 
 void MainThread() {
-    auto tmgr = FindWindowA("TaskManagerWindow", "Task Manager");
+#ifdef _DEBUG
+    g_log = std::make_unique<Logger>("C:\\temp\\baseq.log");
+#else
+    g_log = std::make_unique<Logger>(nullptr);
+#endif
+    g_log->info(L"Loaded");
+    g_c = std::make_unique<Cheat>();
+
+    // assume there is only one task manager window which belongs to us
+    // probably not the best assumption to make
+    auto tmgr = FindWindowW(L"TaskManagerWindow", L"Task Manager");
     if (!tmgr) return;
-    FILE *fp;
-    fopen_s(&fp, "D:\\log.txt", "a");
-    if (!fp) return;
 
     // create the window class for the new window
-    WNDCLASSEXA wc{};
+    WNDCLASSEXW wc{};
     wc.cbSize = sizeof(wc);
     wc.style = CS_HREDRAW | CS_VREDRAW;
     // current module
     wc.hInstance = GetModuleHandle(NULL);
-    wc.lpszClassName = "baseq";
+    wc.lpszClassName = L"baseq";
     wc.lpfnWndProc = window_procedure;
-    ::RegisterClassExA(&wc);
+    ::RegisterClassExW(&wc);
 
-    HWND overlay = CreateWindowExA(
+    HWND overlay = ::CreateWindowExW(
             WS_EX_TOPMOST | WS_EX_TRANSPARENT | WS_EX_LAYERED,
             wc.lpszClassName,
-            "baseq",
+            L"baseq",
             WS_POPUP,
             0,
             0,
@@ -73,7 +87,6 @@ void MainThread() {
         ::GetWindowRect(overlay, &window_area);
         POINT diff{};
         ::ClientToScreen(overlay, &diff);
-        fclose(fp);
         MARGINS margins{
                 diff.x,
                 diff.y,
@@ -85,7 +98,7 @@ void MainThread() {
 
     if (!CreateDeviceD3D(overlay)) {
         CleanupDeviceD3D();
-        ::UnregisterClassA(wc.lpszClassName, wc.hInstance);
+        ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
         return;
     }
 
@@ -93,6 +106,7 @@ void MainThread() {
     ::ShowWindow(tmgr, SW_HIDE);
     ::UpdateWindow(tmgr);
 
+    // FIXME: move this later
     ::ShowWindow(overlay, SW_SHOW);
     ::UpdateWindow(overlay);
 
@@ -104,13 +118,14 @@ void MainThread() {
     ImGui_ImplWin32_Init(overlay);
     ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
 
+    bool is_on_notepad = false;
     while (true) {
         // listen for when we should stop
         bool done = false;
         MSG msg;
-        while (::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE)) {
+        while (::PeekMessageW(&msg, NULL, 0U, 0U, PM_REMOVE)) {
             ::TranslateMessage(&msg);
-            ::DispatchMessage(&msg);
+            ::DispatchMessageW(&msg);
             if (msg.message == WM_QUIT)
                 done = true;
         }
@@ -118,12 +133,15 @@ void MainThread() {
             break;
         }
 
+        // update cheat logic here
+        g_c->update();
+
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
-        ImGui::Begin("baseq");
-        ImGui::Text("Loaded.");
-        ImGui::End();
+
+        g_c->render_overlay();
+
         ImGui::EndFrame();
         ImGui::Render();
 
@@ -133,12 +151,13 @@ void MainThread() {
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
         g_pSwapChain->Present(1, 0);
     }
+
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
     CleanupDeviceD3D();
-    ::UnregisterClassA(wc.lpszClassName, wc.hInstance);
+    ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
 }
 
 // --- boilerplate ---
