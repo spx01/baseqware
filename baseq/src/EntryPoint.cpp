@@ -38,7 +38,7 @@ LRESULT CALLBACK window_procedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
         PostQuitMessage(0);
         return 0;
     }
-    return DefWindowProc(hwnd, msg, wParam, lParam);
+    return ::DefWindowProcW(hwnd, msg, wParam, lParam);
 }
 
 void MainThread() {
@@ -70,14 +70,9 @@ void MainThread() {
             wc.lpszClassName,
             L"baseq",
             WS_POPUP,
-            0,
-            0,
-            800,
-            600,
-            NULL,
-            NULL,
-            wc.hInstance,
-            NULL);
+            0, 0,
+            800, 600,
+            NULL, NULL, wc.hInstance, NULL);
     ::SetLayeredWindowAttributes(overlay, RGB(0, 0, 0), 0xff, LWA_ALPHA);
 
     {
@@ -129,7 +124,7 @@ void MainThread() {
                 done = true;
         }
         if (done) {
-            g_log->dbg(L"Quitting");
+            g_log->info(L"Quitting");
             break;
         }
 
@@ -140,9 +135,9 @@ void MainThread() {
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
+        SetWindowPos(overlay, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
         g_c->render_overlay();
 
-        ImGui::EndFrame();
         ImGui::Render();
 
         const float clear_color_with_alpha[4] = {0.f, 0.f, 0.f, 0.f};

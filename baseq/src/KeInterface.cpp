@@ -6,8 +6,11 @@ KeInterface::KeInterface() {
             GENERIC_READ | GENERIC_WRITE,
             FILE_SHARE_READ | FILE_SHARE_WRITE,
             NULL, OPEN_EXISTING, 0, NULL);
-    if (this->h_driver == NULL || this->h_driver == INVALID_HANDLE_VALUE)
+    if (this->h_driver == NULL || this->h_driver == INVALID_HANDLE_VALUE) {
+        // not very clean design but ok
+        PostQuitMessage(0);
         this->invalid = true;
+    }
 }
 
 KeInterface::~KeInterface() {

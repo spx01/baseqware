@@ -59,7 +59,7 @@ Logger::Logger(const char *filename) {
 
 Logger::~Logger() {
     ::SetConsoleTextAttribute(this->m_con_out, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
-    fputws(L"\nPress ENTER key to exit\n", stdout);
+    fputws(L"\nPress ENTER to exit\n", stdout);
     FILE *f;
     freopen_s(&f, "CONIN$", "r", stdin);
     (void) getchar();

@@ -5,7 +5,7 @@
 Memory::Memory() {
     this->ki = std::make_unique<KeInterface>();
     if (this->ki->is_invalid()) {
-        g_log->err(L"Kernel interface failed to initialize");
+        g_log->err(L"Kernel interface failed to initialize; is driver running?");
         // handle here?
         // TODO: make a function that pauses the console and exits
         return;
