@@ -1,3 +1,5 @@
+// ctrl c v from https://github.com/ContionMig/Simple-Millin-Kernel/blob/master/Driver/ntos.h
+
 #pragma once
 
 #include <ntdef.h>

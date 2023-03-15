@@ -11,8 +11,9 @@ class Cheat {
 public:
     Cheat();
     ~Cheat();
-    // there is probably no point in having a constructor
-    // as we want to reinitialize whenever the game is reopened
+
+    // this is where most of the init code goes
+    // because we support hotloading
     void update();
     void render_overlay();
 

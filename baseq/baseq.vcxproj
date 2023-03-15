@@ -161,7 +161,6 @@
   <ItemGroup>
     <ClCompile Include="src\Memory.cpp" />
     <ClCompile Include="src\Cheat.cpp" />
-    <ClCompile Include="src\DriverPlaceholder.cpp" />
     <ClCompile Include="src\imgui\imgui_impl_dx11.cpp" />
     <ClCompile Include="src\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="src\imgui\imgui.cpp" />
@@ -178,7 +177,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Cheat.h" />
-    <ClInclude Include="include\DriverPlaceholder.h" />
     <ClInclude Include="include\imconfig.h" />
     <ClInclude Include="include\imgui.h" />
     <ClInclude Include="include\imgui_impl_dx11.h" />
