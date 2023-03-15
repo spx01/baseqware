@@ -159,6 +159,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Memory.cpp" />
     <ClCompile Include="src\Cheat.cpp" />
     <ClCompile Include="src\DriverPlaceholder.cpp" />
     <ClCompile Include="src\imgui\imgui_impl_dx11.cpp" />
@@ -188,6 +189,7 @@
     <ClInclude Include="include\imstb_truetype.h" />
     <ClInclude Include="include\KeInterface.h" />
     <ClInclude Include="include\Util.h" />
+    <ClInclude Include="include\Memory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -27,9 +27,10 @@ struct KERNEL_WRITE_REQUEST {
 };
 using PKERNEL_WRITE_REQUEST = KERNEL_WRITE_REQUEST *;
 
+
 class KeInterface {
 public:
-    KeInterface(const char *reg_path);
+    KeInterface();
     ~KeInterface();
 
     template<typename T>
@@ -56,7 +57,9 @@ public:
         return bool(DeviceIoControl(this->h_driver, IO_WRITE_REQUEST, &req, sizeof(req), &req, sizeof(req), &bytes, NULL));
     }
     DWORD get_target_pid();
-    DWORD get_module_base(const char *module_name);
+    DWORD get_client_module();
+
+    inline bool is_invalid() const { return this->invalid; }
 
 private:
     HANDLE h_driver;

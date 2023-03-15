@@ -9,7 +9,7 @@ DWORD driver::get_pid() {
     }
     WCHAR buf[256];
     GetClassNameW(hwnd, buf, 256);
-    g_log->dbg(L"DRIVER: found a notepad (?), class {}", buf);
+    g_log->dbg(L"DRIVER: Found a notepad (?), class {}", buf);
     DWORD pid;
     if (GetWindowThreadProcessId(hwnd, &pid) == 0) {
         return 0;

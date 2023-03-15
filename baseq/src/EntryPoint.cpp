@@ -47,12 +47,12 @@ void MainThread() {
 #else
     g_log = std::make_unique<Logger>(nullptr);
 #endif
-    g_log->info(L"Loaded");
+    g_log->info(L"Started");
     g_c = std::make_unique<Cheat>();
 
     // assume there is only one task manager window which belongs to us
     // probably not the best assumption to make
-    auto tmgr = FindWindowW(L"TaskManagerWindow", L"Task Manager");
+    auto tmgr = ::FindWindowW(L"TaskManagerWindow", L"Task Manager");
     if (!tmgr) return;
 
     // create the window class for the new window
@@ -60,7 +60,7 @@ void MainThread() {
     wc.cbSize = sizeof(wc);
     wc.style = CS_HREDRAW | CS_VREDRAW;
     // current module
-    wc.hInstance = GetModuleHandle(NULL);
+    wc.hInstance = ::GetModuleHandleW(NULL);
     wc.lpszClassName = L"baseq";
     wc.lpfnWndProc = window_procedure;
     ::RegisterClassExW(&wc);
@@ -118,7 +118,6 @@ void MainThread() {
     ImGui_ImplWin32_Init(overlay);
     ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
 
-    bool is_on_notepad = false;
     while (true) {
         // listen for when we should stop
         bool done = false;
@@ -130,6 +129,7 @@ void MainThread() {
                 done = true;
         }
         if (done) {
+            g_log->dbg(L"Quitting");
             break;
         }
 
@@ -151,6 +151,10 @@ void MainThread() {
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
         g_pSwapChain->Present(1, 0);
     }
+
+    // manual cleanup since raii doesn't really work here
+    g_c.reset();
+    g_log.reset();
 
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
