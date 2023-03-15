@@ -1,19 +1,24 @@
+// https://github.com/ContionMig/Simple-Millin-Kernel
+
 #include <ntos.h>
 #include <wdf.h>
 #include <windef.h>
 
 // Request to read virtual user memory (memory of a program) from kernel space
 #define IO_READ_REQUEST CTL_CODE(FILE_DEVICE_UNKNOWN, 0x0691 /* Our Custom Code */, METHOD_BUFFERED, FILE_SPECIAL_ACCESS)
-
 // Request to write virtual user memory (memory of a program) from kernel space
 #define IO_WRITE_REQUEST CTL_CODE(FILE_DEVICE_UNKNOWN, 0x0692 /* Our Custom Code */, METHOD_BUFFERED, FILE_SPECIAL_ACCESS)
-
 // Request to retrieve the process id of csgo process, from kernel space
 #define IO_GET_ID_REQUEST CTL_CODE(FILE_DEVICE_UNKNOWN, 0x0693 /* Our Custom Code */, METHOD_BUFFERED, FILE_SPECIAL_ACCESS)
-
 // Request to retrieve the base address of client.dll in csgo.exe from kernel space
 #define IO_GET_MODULE_REQUEST CTL_CODE(FILE_DEVICE_UNKNOWN, 0x0694 /* Our Custom Code */, METHOD_BUFFERED, FILE_SPECIAL_ACCESS)
 
+#define PRINT(x, ...) DbgPrintEx(0, 0, "[PASED] " x, __VA_ARGS__)
+#ifdef _DEBUG
+#define DEBUG(x, ...) DbgPrintEx(0, 0, "[PASED][DBG] " x, __VA_ARGS__)
+#else
+#define DEBUG(...)
+#endif
 
 PDEVICE_OBJECT pDeviceObject;// our driver object
 UNICODE_STRING dev, dos;     // Driver registry paths
@@ -68,16 +73,19 @@ PLOAD_IMAGE_NOTIFY_ROUTINE ImageLoadCallback(PUNICODE_STRING FullImageName,
     // Compare our string to input
     if (wcsstr(FullImageName->Buffer, L"\\csgo\\bin\\client.dll")) {
         // if it matches
-        DbgPrintEx(0, 0, "Loaded Name: %ls \n", FullImageName->Buffer);
-        DbgPrintEx(0, 0, "Loaded To Process: %d \n", (DWORD) ProcessId);
+        DEBUG("loaded name: %ls\n", FullImageName->Buffer);
+        DEBUG("found pid: %d\n", (DWORD) ProcessId);
 
         ClientAddress = ImageInfo->ImageBase;
         csgoId = ProcessId;
     }
 }
 
+// set a callback for every process created/destroyed
+// we only care about when csgo is destroyed, so that we never provide invalid data to user space
 PCREATE_PROCESS_NOTIFY_ROUTINE ProcessNotifyCallback(HANDLE ParentId, HANDLE ProcessId, BOOLEAN Create) {
     if (!Create && csgoId == ProcessId) {
+        DEBUG("process destroyed\n");
         csgoId = 0;
         ClientAddress = 0;
     }
@@ -128,14 +136,14 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
         PULONG OutPut = (PULONG) Irp->AssociatedIrp.SystemBuffer;
         *OutPut = csgoId;
 
-        DbgPrintEx(0, 0, "id get %#010x", csgoId);
+        DEBUG("id get %#010x\n", csgoId);
         Status = STATUS_SUCCESS;
         BytesIO = sizeof(*OutPut);
     } else if (ControlCode == IO_GET_MODULE_REQUEST) {
         PULONG OutPut = (PULONG) Irp->AssociatedIrp.SystemBuffer;
         *OutPut = ClientAddress;
 
-        DbgPrintEx(0, 0, "Module get %#010x", ClientAddress);
+        DEBUG("module get %#010x\n", ClientAddress);
         Status = STATUS_SUCCESS;
         BytesIO = sizeof(*OutPut);
     } else {
@@ -189,11 +197,13 @@ PDEVICE_OBJECT DeviceObject;
 // Driver Entrypoint
 NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject,
                      PUNICODE_STRING pRegistryPath) {
-    DbgPrintEx(0, 0, "321321321Driver Loaded\n");
+    PRINT("driver loaded\n");
 
     PsSetLoadImageNotifyRoutine(ImageLoadCallback);
     PsSetCreateProcessNotifyRoutine(ProcessNotifyCallback, FALSE);
 
+#ifndef _DEBUG
+    PRINT("hiding driver\n");
     PLDR_DATA_TABLE_ENTRY CurDriverEntry = (PLDR_DATA_TABLE_ENTRY) pDriverObject->DriverSection;
     PLDR_DATA_TABLE_ENTRY NextDriverEntry = (PLDR_DATA_TABLE_ENTRY) CurDriverEntry->InLoadOrderLinks.Flink;
     PLDR_DATA_TABLE_ENTRY PrevDriverEntry = (PLDR_DATA_TABLE_ENTRY) CurDriverEntry->InLoadOrderLinks.Blink;
@@ -203,6 +213,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject,
 
     CurDriverEntry->InLoadOrderLinks.Flink = (PLIST_ENTRY) CurDriverEntry;
     CurDriverEntry->InLoadOrderLinks.Blink = (PLIST_ENTRY) CurDriverEntry;
+#endif
 
     RtlInitUnicodeString(&dev, L"\\Device\\pased");
     RtlInitUnicodeString(&dos, L"\\DosDevices\\pased");
@@ -217,15 +228,17 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject,
 
     pDeviceObject->Flags |= DO_DIRECT_IO;
     pDeviceObject->Flags &= ~DO_DEVICE_INITIALIZING;
+    return STATUS_SUCCESS;
 }
 
 
 NTSTATUS UnloadDriver(PDRIVER_OBJECT pDriverObject) {
-    DbgPrintEx(0, 0, "Unload routine called.\n");
+    PRINT("unload routine\n");
     PsRemoveLoadImageNotifyRoutine(ImageLoadCallback);
     PsSetCreateProcessNotifyRoutine(ProcessNotifyCallback, TRUE);
     IoDeleteSymbolicLink(&dos);
     IoDeleteDevice(pDriverObject->DeviceObject);
+    return STATUS_SUCCESS;
 }
 
 NTSTATUS CreateCall(PDEVICE_OBJECT DeviceObject, PIRP irp) {
