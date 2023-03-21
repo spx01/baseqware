@@ -29,18 +29,6 @@ static ID3D11DeviceContext *g_pd3dDeviceContext = NULL;
 static IDXGISwapChain *g_pSwapChain = NULL;
 static ID3D11RenderTargetView *g_mainRenderTargetView = NULL;
 
-// wndproc forwarder
-LRESULT CALLBACK window_procedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam)) {
-        return 0;
-    }
-    if (msg == WM_DESTROY) {
-        PostQuitMessage(0);
-        return 0;
-    }
-    return ::DefWindowProcW(hwnd, msg, wParam, lParam);
-}
-
 void MainThread() {
 #ifdef _DEBUG
     g_log = std::make_unique<Logger>("C:\\temp\\baseq.log");
@@ -48,7 +36,6 @@ void MainThread() {
     g_log = std::make_unique<Logger>(nullptr);
 #endif
     g_log->info(L"Started");
-    g_c = std::make_unique<Cheat>();
 
     // assume there is only one task manager window which belongs to us
     // probably not the best assumption to make
@@ -62,7 +49,7 @@ void MainThread() {
     // current module
     wc.hInstance = ::GetModuleHandleW(NULL);
     wc.lpszClassName = L"baseq";
-    wc.lpfnWndProc = window_procedure;
+    wc.lpfnWndProc = WndProc;
     ::RegisterClassExW(&wc);
 
     HWND overlay = ::CreateWindowExW(
@@ -70,26 +57,12 @@ void MainThread() {
             wc.lpszClassName,
             L"baseq",
             WS_POPUP,
-            0, 0,
-            800, 600,
+            0, 0, 0, 0,
             NULL, NULL, wc.hInstance, NULL);
     ::SetLayeredWindowAttributes(overlay, RGB(0, 0, 0), 0xff, LWA_ALPHA);
-
-    {
-        RECT client_area{};
-        ::GetClientRect(overlay, &client_area);
-        RECT window_area{};
-        ::GetWindowRect(overlay, &window_area);
-        POINT diff{};
-        ::ClientToScreen(overlay, &diff);
-        MARGINS margins{
-                diff.x,
-                diff.y,
-                client_area.right,
-                client_area.bottom,
-        };
-        ::DwmExtendFrameIntoClientArea(overlay, &margins);
-    }
+    ::ShowWindow(overlay, SW_SHOW);
+    ::UpdateWindow(overlay);
+    g_c = std::make_unique<Cheat>(overlay);
 
     if (!CreateDeviceD3D(overlay)) {
         CleanupDeviceD3D();
@@ -100,10 +73,6 @@ void MainThread() {
     // hide task manager and show our overlay
     ::ShowWindow(tmgr, SW_HIDE);
     ::UpdateWindow(tmgr);
-
-    // FIXME: move this later
-    ::ShowWindow(overlay, SW_SHOW);
-    ::UpdateWindow(overlay);
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -135,7 +104,6 @@ void MainThread() {
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        SetWindowPos(overlay, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
         g_c->render_overlay();
 
         ImGui::Render();
@@ -147,7 +115,7 @@ void MainThread() {
         g_pSwapChain->Present(1, 0);
     }
 
-    // manual cleanup since raii doesn't really work here
+    // manual cleanup since raii doesn't really work for globals
     g_c.reset();
     g_log.reset();
 
