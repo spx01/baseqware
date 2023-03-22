@@ -203,6 +203,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject,
     PsSetCreateProcessNotifyRoutine(ProcessNotifyCallback, FALSE);
 
 #ifndef _DEBUG
+#if 0
     PRINT("hiding driver\n");
     PLDR_DATA_TABLE_ENTRY CurDriverEntry = (PLDR_DATA_TABLE_ENTRY) pDriverObject->DriverSection;
     PLDR_DATA_TABLE_ENTRY NextDriverEntry = (PLDR_DATA_TABLE_ENTRY) CurDriverEntry->InLoadOrderLinks.Flink;
@@ -213,6 +214,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject,
 
     CurDriverEntry->InLoadOrderLinks.Flink = (PLIST_ENTRY) CurDriverEntry;
     CurDriverEntry->InLoadOrderLinks.Blink = (PLIST_ENTRY) CurDriverEntry;
+#endif
 #endif
 
     RtlInitUnicodeString(&dev, L"\\Device\\pased");
