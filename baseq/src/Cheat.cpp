@@ -90,14 +90,33 @@ void Cheat::update() {
     }
 }
 
-void Cheat::render_overlay() {
+void Cheat::update_overlay() {
     if (!this->game_focused) return;
     SetWindowPos(this->overlay, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
+
+    auto &io = ImGui::GetIO();
+    // io.MouseDrawCursor = true;
+    auto state = ::GetAsyncKeyState(VK_LBUTTON);
+    if (!(state & 0x8000) && io.MouseDown[0]) {
+        io.MouseReleased[0] = true;
+    }
+    io.MouseDown[0] = (state & 0x8000);
+    POINT p;
+    ::GetCursorPos(&p);
+    ::ScreenToClient(overlay, &p);
+    io.MousePos = {float(p.x), float(p.y)};
+
     if (::GetAsyncKeyState(VK_TAB)) {
-        ImGui::SetWindowPos(ImVec2(0, 0));
-        ImGui::SetWindowSize(ImVec2(0, 0));
         ImGui::Begin("baseq");
         ImGui::Text("game is focused");
+        ImGui::Button("test");
         ImGui::End();
     }
+    ImGui::SetNextWindowPos({0, 0});
+    ImGui::SetNextWindowSize({float(this->client_width()), float(this->client_height())});
+    ImGui::Begin("something", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs);
+    auto draw_list = ImGui::GetWindowDrawList();
+    draw_list->AddRectFilled({0, 0}, {100, 100}, IM_COL32(255, 0, 0, 255));
+    draw_list->AddText({300, 300}, IM_COL32(0, 25, 100, 255), "ayo what");
+    ImGui::End();
 }

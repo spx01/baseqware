@@ -78,6 +78,12 @@ void MainThread() {
     ImGui::CreateContext();
     ImGui_ImplWin32_EnableDpiAwareness();
     ImGui::StyleColorsDark();
+    auto &io = ImGui::GetIO();
+    ImFontConfig cfg{};
+    cfg.OversampleH = 3;
+    cfg.OversampleV = 1;
+    cfg.PixelSnapH = true;
+    io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 24, &cfg);
 
     ImGui_ImplWin32_Init(overlay);
     ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
@@ -91,6 +97,11 @@ void MainThread() {
             ::DispatchMessageW(&msg);
             if (msg.message == WM_QUIT)
                 done = true;
+            else if (msg.message == WM_MOUSEMOVE ||
+                     msg.message == WM_LBUTTONDOWN ||
+                     msg.message == WM_LBUTTONUP) {
+                //WndProc(msg.hwnd, msg.message, msg.wParam, msg.lParam);
+            }
         }
         if (done) {
             g_log->info(L"Quitting");
@@ -104,7 +115,7 @@ void MainThread() {
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        g_c->render_overlay();
+        g_c->update_overlay();
 
         ImGui::Render();
 
@@ -220,6 +231,12 @@ void CleanupRenderTarget() {
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
         return true;
+    /* if (ImGui::GetCurrentContext() != nullptr) {
+        auto &io = ImGui::GetIO();
+        if (io.WantCaptureMouse && (msg == WM_LBUTTONDOWN || msg == WM_LBUTTONUP || msg == WM_RBUTTONDOWN || msg == WM_RBUTTONUP || msg == WM_MBUTTONDOWN || msg == WM_MBUTTONUP || msg == WM_MOUSEWHEEL || msg == WM_MOUSEMOVE)) {
+            return true;
+        }
+    } */
 
     switch (msg) {
         case WM_SIZE:

@@ -15,7 +15,7 @@ public:
     // this is where most of the init code goes
     // because we support hotloading
     void update();
-    void render_overlay();
+    void update_overlay();
     inline LONG client_width() const {
         return this->client_area.right - this->client_area.left;
     }
