@@ -1,7 +1,11 @@
+#define IMGUI_DEFINE_MATH_OPERATORS
+
 #include "Util.h"
 
 #include <cassert>
 #include <cstdio>
+
+#include <imgui.h>
 
 
 void print_art(HANDLE console) {
@@ -100,4 +104,15 @@ void Logger::err_nofmt(const WCHAR *str) {
     if (this->fp) {
         fputws(fmt.c_str(), this->fp);
     }
+}
+
+void gutil::draw_text_border(ImDrawList *dw, const char *text, ImVec2 pos, ImU32 text_color, ImFont *font, float font_size) {
+    static constexpr ImU32 border_color = IM_COL32(0, 0, 0, 255);
+    // Draw the border
+    dw->AddText(font, font_size, pos + ImVec2(-1, -1), border_color, text);
+    dw->AddText(font, font_size, pos + ImVec2(-1, 1), border_color, text);
+    dw->AddText(font, font_size, pos + ImVec2(1, -1), border_color, text);
+    dw->AddText(font, font_size, pos + ImVec2(1, 1), border_color, text);
+    // Draw the text on top of the border
+    dw->AddText(font, font_size, pos, text_color, text);
 }

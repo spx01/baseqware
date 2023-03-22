@@ -12,9 +12,9 @@ public:
     inline bool is_valid() const { return this->valid; }
     DWORD game_pid = 0;
     DWORD game_base = 0;
+    KeInterface ki;
 
 private:
-    std::unique_ptr<KeInterface> ki;
     bool valid = true;
 };
 

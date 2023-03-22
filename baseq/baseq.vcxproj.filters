@@ -92,5 +92,8 @@
     <ClInclude Include="include\Memory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\csgo.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

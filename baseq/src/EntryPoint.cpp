@@ -78,15 +78,16 @@ void MainThread() {
     ImGui::CreateContext();
     ImGui_ImplWin32_EnableDpiAwareness();
     ImGui::StyleColorsDark();
+
+    ImGui_ImplWin32_Init(overlay);
+    ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
+
     auto &io = ImGui::GetIO();
     ImFontConfig cfg{};
     cfg.OversampleH = 3;
     cfg.OversampleV = 1;
     cfg.PixelSnapH = true;
     io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 24, &cfg);
-
-    ImGui_ImplWin32_Init(overlay);
-    ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
 
     while (true) {
         // listen for when we should stop
@@ -97,18 +98,13 @@ void MainThread() {
             ::DispatchMessageW(&msg);
             if (msg.message == WM_QUIT)
                 done = true;
-            else if (msg.message == WM_MOUSEMOVE ||
-                     msg.message == WM_LBUTTONDOWN ||
-                     msg.message == WM_LBUTTONUP) {
-                //WndProc(msg.hwnd, msg.message, msg.wParam, msg.lParam);
-            }
         }
         if (done) {
             g_log->info(L"Quitting");
             break;
         }
 
-        // update cheat logic here
+        // update state relating to the game process/window here
         g_c->update();
 
         ImGui_ImplDX11_NewFrame();

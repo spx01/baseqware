@@ -188,6 +188,7 @@
     <ClInclude Include="include\KeInterface.h" />
     <ClInclude Include="include\Util.h" />
     <ClInclude Include="include\Memory.h" />
+    <ClInclude Include="include\csgo.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -6,6 +6,8 @@
 
 #include <Windows.h>
 
+#include <imgui.h>
+
 namespace util {
 }
 
@@ -45,3 +47,7 @@ private:
 };
 
 inline std::unique_ptr<Logger> g_log;
+
+namespace gutil {
+    void draw_text_border(ImDrawList *dw, const char *text, ImVec2 pos, ImU32 text_color, ImFont *font, float font_size);
+}

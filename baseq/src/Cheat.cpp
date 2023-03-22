@@ -16,6 +16,7 @@ Cheat::~Cheat() {
 }
 
 void Cheat::update() {
+    // this isn't supposed to be here
     this->mem->update();
 
     // determine whether the game is still running
@@ -38,8 +39,10 @@ void Cheat::update() {
         ::GetWindowThreadProcessId(hwnd, &pid);
         if (pid == this->mem->game_pid) {
             g_log->info(L"Found game window");
-            g_log->dbg(L"hwnd: {:0x}", uintptr_t(hwnd));
-            g_log->dbg(L"pid: {:0x}", pid);
+            g_log->dbg(L"hwnd: {:8X}", uintptr_t(hwnd));
+            g_log->dbg(L"pid: {:8X}", pid);
+            // TODO: need engine and vstdlib as well
+            g_log->info(L"client.dll -> 0x{:08X}", this->mem->game_base);
             this->game_hwnd = hwnd;
         } else {
             return;
@@ -118,5 +121,6 @@ void Cheat::update_overlay() {
     auto draw_list = ImGui::GetWindowDrawList();
     draw_list->AddRectFilled({0, 0}, {100, 100}, IM_COL32(255, 0, 0, 255));
     draw_list->AddText({300, 300}, IM_COL32(0, 25, 100, 255), "ayo what");
+    gutil::draw_text_border(draw_list, "hello world", ImVec2{800, 800}, IM_COL32(255, 255, 255, 255), ImGui::GetFont(), 30);
     ImGui::End();
 }
