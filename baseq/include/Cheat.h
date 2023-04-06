@@ -3,6 +3,8 @@
 #include <Windows.h>
 
 #include <memory>
+#include <thread>
+#include <vector>
 
 #include "Memory.h"
 
@@ -26,14 +28,21 @@ public:
         return {this->client_area.left, this->client_area.top};
     }
 
+    // used to shut down all the cheat threads
+    bool shutdown = false;
+
+    // not entirely sure why i made this its own class
+    std::unique_ptr<Memory> mem;
+
 private:
     bool game_focused = false;
     HWND game_hwnd = NULL;
     HWND overlay = NULL;
     RECT client_area{};
 
-    // not entirely sure why i made this its own class
-    std::unique_ptr<Memory> mem;
+
+    std::vector<std::thread> threads;
+    void dispatch_threads();
 };
 
 inline std::unique_ptr<Cheat> g_c;

@@ -159,6 +159,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\cheats\Esp.cpp" />
+    <ClCompile Include="src\Config.cpp" />
     <ClCompile Include="src\Memory.cpp" />
     <ClCompile Include="src\Cheat.cpp" />
     <ClCompile Include="src\imgui\imgui_impl_dx11.cpp" />
@@ -176,7 +178,9 @@
     <None Include=".clang-format" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Config.h" />
     <ClInclude Include="include\Cheat.h" />
+    <ClInclude Include="include\cheats\Esp.h" />
     <ClInclude Include="include\imconfig.h" />
     <ClInclude Include="include\imgui.h" />
     <ClInclude Include="include\imgui_impl_dx11.h" />
@@ -186,6 +190,8 @@
     <ClInclude Include="include\imstb_textedit.h" />
     <ClInclude Include="include\imstb_truetype.h" />
     <ClInclude Include="include\KeInterface.h" />
+    <ClInclude Include="include\sdk\const.h" />
+    <ClInclude Include="include\sdk\mathlib.h" />
     <ClInclude Include="include\Util.h" />
     <ClInclude Include="include\Memory.h" />
     <ClInclude Include="include\csgo.hpp" />

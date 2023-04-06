@@ -91,15 +91,14 @@ void MainThread() {
 
     while (true) {
         // listen for when we should stop
-        bool done = false;
         MSG msg;
         while (::PeekMessageW(&msg, NULL, 0U, 0U, PM_REMOVE)) {
             ::TranslateMessage(&msg);
             ::DispatchMessageW(&msg);
             if (msg.message == WM_QUIT)
-                done = true;
+                g_c->shutdown = true;
         }
-        if (done) {
+        if (g_c->shutdown) {
             g_log->info(L"Quitting");
             break;
         }
@@ -123,7 +122,9 @@ void MainThread() {
     }
 
     // manual cleanup since raii doesn't really work for globals
-    g_c.reset();
+    // we need to keep the pointer valid for destruction, therefore cannot use reset
+    g_c.get_deleter()(g_c.get());
+    g_c.release();
     g_log.reset();
 
     ImGui_ImplDX11_Shutdown();

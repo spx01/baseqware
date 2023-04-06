@@ -2,6 +2,10 @@
 
 #include <Windows.h>
 
+#include <utility>
+
+#include "Util.h"
+
 // Request to read virtual user memory (memory of a program) from kernel space
 #define IO_READ_REQUEST CTL_CODE(FILE_DEVICE_UNKNOWN, 0x0691 /* Our Custom Code */, METHOD_BUFFERED, FILE_SPECIAL_ACCESS)
 // Request to write virtual user memory (memory of a program) from kernel space
@@ -34,19 +38,19 @@ public:
     ~KeInterface();
 
     template<typename T>
-    T read(ULONG pid, ULONG addr, ULONG size) {
+    std::pair<T, bool> read(ULONG pid, ULONG addr, ULONG size = sizeof(T)) const {
         KERNEL_READ_REQUEST req = {
                 .pid = pid,
                 .addr = addr,
                 .out = 0,
                 .size = size};
         DWORD bytes;
-        if (!DeviceIoControl(this->h_driver, IO_READ_REQUEST, &req, sizeof(req), &req, sizeof(req), &bytes, NULL))
-            return T{};
-        return *reinterpret_cast<T *>(&req.out);
+        if (!::DeviceIoControl(this->h_driver, IO_READ_REQUEST, &req, sizeof(req), &req, sizeof(req), &bytes, NULL))
+            return {T{}, false};
+        return {*reinterpret_cast<T *>(&req.out), true};
     }
     template<typename T>
-    bool write(ULONG pid, ULONG addr, T val, ULONG size = sizeof(T)) {
+    bool write(ULONG pid, ULONG addr, T val, ULONG size = sizeof(T)) const {
         KERNEL_WRITE_REQUEST req = {
                 .pid = pid,
                 .addr = addr,
@@ -54,7 +58,7 @@ public:
                 .size = size};
         memcpy_s(&req.val, sizeof(req.val), &val, size);
         DWORD bytes;
-        return bool(DeviceIoControl(this->h_driver, IO_WRITE_REQUEST, &req, sizeof(req), &req, sizeof(req), &bytes, NULL));
+        return bool(::DeviceIoControl(this->h_driver, IO_WRITE_REQUEST, &req, sizeof(req), &req, sizeof(req), &bytes, NULL));
     }
     DWORD get_target_pid();
     DWORD get_client_module();

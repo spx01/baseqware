@@ -23,7 +23,9 @@
 PDEVICE_OBJECT pDeviceObject;// our driver object
 UNICODE_STRING dev, dos;     // Driver registry paths
 
-ULONG csgoId, ClientAddress;
+ULONG csgoId;
+ULONG ClientAddress;
+ULONG ClientSize;
 
 // datatype for read request
 typedef struct _KERNEL_READ_REQUEST {
@@ -43,6 +45,11 @@ typedef struct _KERNEL_WRITE_REQUEST {
     ULONG Size;
 
 } KERNEL_WRITE_REQUEST, *PKERNEL_WRITE_REQUEST;
+
+// TODO IMPORTANT
+// add module requests
+// would return both the base address and size of the module
+// module would be indexed by an enum
 
 NTSTATUS UnloadDriver(PDRIVER_OBJECT pDriverObject);
 NTSTATUS CreateCall(PDEVICE_OBJECT DeviceObject, PIRP irp);
@@ -77,6 +84,7 @@ PLOAD_IMAGE_NOTIFY_ROUTINE ImageLoadCallback(PUNICODE_STRING FullImageName,
         DEBUG("found pid: %d\n", (DWORD) ProcessId);
 
         ClientAddress = ImageInfo->ImageBase;
+        ClientSize = ImageInfo->ImageSize;
         csgoId = ProcessId;
     }
 }
@@ -88,6 +96,7 @@ PCREATE_PROCESS_NOTIFY_ROUTINE ProcessNotifyCallback(HANDLE ParentId, HANDLE Pro
         DEBUG("process destroyed\n");
         csgoId = 0;
         ClientAddress = 0;
+        ClientSize = 0;
     }
 }
 

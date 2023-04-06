@@ -1,18 +1,25 @@
 #include "Cheat.h"
 
-#include "Util.h"
+#include <thread>
 
 #include <Windows.h>
 #include <dwmapi.h>
 
 #include <imgui.h>
 
+#include "Util.h"
+#include "cheats/Esp.h"
+
 Cheat::Cheat(HWND overlay) {
     this->mem = std::make_unique<Memory>();
     this->overlay = overlay;
+    this->dispatch_threads();
 }
 
 Cheat::~Cheat() {
+    for (auto &thread: this->threads) {
+        thread.join();
+    }
 }
 
 void Cheat::update() {
@@ -41,7 +48,7 @@ void Cheat::update() {
             g_log->dbg(L"hwnd: {:8X}", uintptr_t(hwnd));
             g_log->dbg(L"pid: {:8X}", pid);
             // TODO: need engine and vstdlib as well
-            g_log->info(L"client.dll -> 0x{:08X}", this->mem->game_base);
+            g_log->info(L"client.dll -> 0x{:08X}", this->mem->client_base);
             this->game_hwnd = hwnd;
         } else {
             return;
@@ -122,4 +129,8 @@ void Cheat::update_overlay() {
     draw_list->AddText({300, 300}, IM_COL32(0, 25, 100, 255), "ayo what");
     gutil::draw_text_border(draw_list, "hello world", ImVec2{800, 800}, IM_COL32(255, 255, 255, 255), ImGui::GetFont(), 30);
     ImGui::End();
+}
+
+void Cheat::dispatch_threads() {
+    this->threads.emplace_back(cheats::Esp::run);
 }

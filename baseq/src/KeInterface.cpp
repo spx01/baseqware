@@ -8,7 +8,7 @@ KeInterface::KeInterface() {
             NULL, OPEN_EXISTING, 0, NULL);
     if (this->h_driver == NULL || this->h_driver == INVALID_HANDLE_VALUE) {
         // not very clean design but ok
-        PostQuitMessage(0);
+        ::PostQuitMessage(0);
         this->invalid = true;
     }
 }

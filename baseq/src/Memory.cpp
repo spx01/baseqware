@@ -18,7 +18,7 @@ void Memory::update() {
     if (pid != this->game_pid) {
         valid = true;
         DWORD base = this->ki.get_client_module();
-        this->game_base = base;
+        this->client_base = base;
         this->game_pid = pid;
     }
 }
