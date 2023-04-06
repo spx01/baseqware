@@ -29,7 +29,9 @@ public:
     }
 
     DWORD game_pid = 0;
+    // FIXME
     DWORD client_base = 0;
+    DWORD client_size = 0;
 
 private:
     KeInterface ki;

@@ -190,6 +190,7 @@
     <ClInclude Include="include\imstb_textedit.h" />
     <ClInclude Include="include\imstb_truetype.h" />
     <ClInclude Include="include\KeInterface.h" />
+    <ClInclude Include="include\sdk\entity.h" />
     <ClInclude Include="include\sdk\const.h" />
     <ClInclude Include="include\sdk\mathlib.h" />
     <ClInclude Include="include\Util.h" />

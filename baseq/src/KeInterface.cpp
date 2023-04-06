@@ -1,5 +1,7 @@
 #include "KeInterface.h"
 
+#include "Util.h"
+
 KeInterface::KeInterface() {
     this->h_driver = ::CreateFileW(
             L"\\\\.\\pased",
@@ -26,10 +28,15 @@ DWORD KeInterface::get_target_pid() {
     return static_cast<DWORD>(pid);
 }
 
-DWORD KeInterface::get_client_module() {
-    ULONG addr{};
+std::pair<DWORD, DWORD> KeInterface::get_module(REQUESTABLE_MODULE mod) {
+    KERNEL_GET_MODULE_REQUEST req = {
+            .mod = mod,
+            .addr = 0,
+            .size = 0};
     DWORD bytes;
-    if (!::DeviceIoControl(this->h_driver, IO_GET_MODULE_REQUEST, &addr, sizeof(addr), &addr, sizeof(addr), &bytes, NULL))
-        return NULL;
-    return addr;
+    if (!::DeviceIoControl(this->h_driver, IO_GET_MODULE_REQUEST, &req, sizeof(req), &req, sizeof(req), &bytes, NULL)) {
+        g_log->err(L"Failed to get module (type {}): kernel driver error", int(mod));
+        ::PostQuitMessage(0);
+    }
+    return {req.addr, req.size};
 }

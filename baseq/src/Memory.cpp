@@ -17,8 +17,7 @@ void Memory::update() {
     }
     if (pid != this->game_pid) {
         valid = true;
-        DWORD base = this->ki.get_client_module();
-        this->client_base = base;
+        std::tie(this->client_base, this->client_size) = this->ki.get_module(REQUESTABLE_MODULE::CLIENT_MODULE);
         this->game_pid = pid;
     }
 }

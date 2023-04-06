@@ -16,6 +16,10 @@ namespace sdk {
             return this->addr;
         }
 
+        operator bool() const {
+            return bool(this->get());
+        }
+
         inline LIFE get_lifestate() const {
             return g_c->mem->read<LIFE>(this->addr + hazedumper::netvars::m_lifeState);
         }

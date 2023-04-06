@@ -15,6 +15,14 @@
 // Request to retrieve the base address of client.dll in csgo.exe from kernel space
 #define IO_GET_MODULE_REQUEST CTL_CODE(FILE_DEVICE_UNKNOWN, 0x0694 /* Our Custom Code */, METHOD_BUFFERED, FILE_SPECIAL_ACCESS)
 
+enum class REQUESTABLE_MODULE : int {
+    CLIENT_MODULE = 0,
+    /* ENGINE_MODULE,
+    VSTDLIB_MODULE,
+    TIER0_MODULE, */
+    _COUNT
+};
+
 struct KERNEL_READ_REQUEST {
     ULONG pid;
     ULONG addr;
@@ -31,6 +39,12 @@ struct KERNEL_WRITE_REQUEST {
 };
 using PKERNEL_WRITE_REQUEST = KERNEL_WRITE_REQUEST *;
 
+struct KERNEL_GET_MODULE_REQUEST {
+    REQUESTABLE_MODULE mod;
+    ULONG addr;
+    ULONG size;
+};
+using PKERNEL_GET_MODULE_REQUEST = KERNEL_GET_MODULE_REQUEST *;
 
 class KeInterface {
 public:
@@ -61,7 +75,7 @@ public:
         return bool(::DeviceIoControl(this->h_driver, IO_WRITE_REQUEST, &req, sizeof(req), &req, sizeof(req), &bytes, NULL));
     }
     DWORD get_target_pid();
-    DWORD get_client_module();
+    std::pair<DWORD, DWORD> get_module(REQUESTABLE_MODULE mod);
 
     inline bool is_invalid() const { return this->invalid; }
 

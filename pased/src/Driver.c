@@ -1,8 +1,26 @@
 // https://github.com/ContionMig/Simple-Millin-Kernel
 
+#include <limits.h>
+
 #include <ntos.h>
 #include <wdf.h>
 #include <windef.h>
+
+typedef enum _REQUESTABLE_MODULE {
+    CLIENT_MODULE = 0,
+    /* ENGINE_MODULE,
+    VSTDLIB_MODULE,
+    TIER0_MODULE, */
+    _RM_MODULE_COUNT,
+    _RM_FORCE_SIZE = INT_MAX,
+} REQUESTABLE_MODULE;
+
+PCWSTR kModulePaths[_RM_MODULE_COUNT] = {
+        L"\\csgo\\bin\\client.dll",
+};
+
+ULONG ModuleAddresses[_RM_MODULE_COUNT];
+ULONG ModuleSizes[_RM_MODULE_COUNT];
 
 // Request to read virtual user memory (memory of a program) from kernel space
 #define IO_READ_REQUEST CTL_CODE(FILE_DEVICE_UNKNOWN, 0x0691 /* Our Custom Code */, METHOD_BUFFERED, FILE_SPECIAL_ACCESS)
@@ -24,8 +42,6 @@ PDEVICE_OBJECT pDeviceObject;// our driver object
 UNICODE_STRING dev, dos;     // Driver registry paths
 
 ULONG csgoId;
-ULONG ClientAddress;
-ULONG ClientSize;
 
 // datatype for read request
 typedef struct _KERNEL_READ_REQUEST {
@@ -45,6 +61,12 @@ typedef struct _KERNEL_WRITE_REQUEST {
     ULONG Size;
 
 } KERNEL_WRITE_REQUEST, *PKERNEL_WRITE_REQUEST;
+
+typedef struct _KERNEL_GET_MODULE_REQUEST {
+    REQUESTABLE_MODULE Module;
+    ULONG Address;
+    ULONG Size;
+} KERNEL_GET_MODULE_REQUEST, *PKERNEL_GET_MODULE_REQUEST;
 
 // TODO IMPORTANT
 // add module requests
@@ -78,14 +100,14 @@ NTSTATUS KeWriteVirtualMemory(PEPROCESS Process, PVOID SourceAddress, PVOID Targ
 PLOAD_IMAGE_NOTIFY_ROUTINE ImageLoadCallback(PUNICODE_STRING FullImageName,
                                              HANDLE ProcessId, PIMAGE_INFO ImageInfo) {
     // Compare our string to input
-    if (wcsstr(FullImageName->Buffer, L"\\csgo\\bin\\client.dll")) {
-        // if it matches
-        DEBUG("loaded name: %ls\n", FullImageName->Buffer);
-        DEBUG("found pid: %d\n", (DWORD) ProcessId);
-
-        ClientAddress = ImageInfo->ImageBase;
-        ClientSize = ImageInfo->ImageSize;
-        csgoId = ProcessId;
+    for (int i = 0; i < _RM_MODULE_COUNT; ++i) {
+        if (wcsstr(FullImageName->Buffer, kModulePaths[i])) {
+            ModuleAddresses[i] = ImageInfo->ImageBase;
+            ModuleSizes[i] = ImageInfo->ImageSize;
+            csgoId = ProcessId;
+            DEBUG("loaded name: %ls\n", FullImageName->Buffer);
+            DEBUG("found pid: %d\n", (DWORD) ProcessId);
+        }
     }
 }
 
@@ -95,8 +117,9 @@ PCREATE_PROCESS_NOTIFY_ROUTINE ProcessNotifyCallback(HANDLE ParentId, HANDLE Pro
     if (!Create && csgoId == ProcessId) {
         DEBUG("process destroyed\n");
         csgoId = 0;
-        ClientAddress = 0;
-        ClientSize = 0;
+        for (int i = 0; i < _RM_MODULE_COUNT; ++i) {
+            ModuleAddresses[i] = ModuleSizes[i] = 0;
+        }
     }
 }
 
@@ -149,12 +172,17 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
         Status = STATUS_SUCCESS;
         BytesIO = sizeof(*OutPut);
     } else if (ControlCode == IO_GET_MODULE_REQUEST) {
-        PULONG OutPut = (PULONG) Irp->AssociatedIrp.SystemBuffer;
-        *OutPut = ClientAddress;
-
-        DEBUG("module get %#010x\n", ClientAddress);
-        Status = STATUS_SUCCESS;
-        BytesIO = sizeof(*OutPut);
+        PKERNEL_GET_MODULE_REQUEST GetModuleIO = (PKERNEL_GET_MODULE_REQUEST) Irp->AssociatedIrp.SystemBuffer;
+        REQUESTABLE_MODULE mod = GetModuleIO->Module;
+        if (mod >= _RM_MODULE_COUNT || mod < 0) {
+            Status = STATUS_INVALID_PARAMETER;
+        } else {
+            GetModuleIO->Address = ModuleAddresses[mod];
+            GetModuleIO->Size = ModuleAddresses[mod];
+            DEBUG("module get %#010x\n", ModuleAddresses[mod]);
+            BytesIO = sizeof(KERNEL_GET_MODULE_REQUEST);
+            Status = STATUS_SUCCESS;
+        }
     } else {
         // if the code is unknown
         Status = STATUS_INVALID_PARAMETER;

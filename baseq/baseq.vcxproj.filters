@@ -113,5 +113,8 @@
     <ClInclude Include="include\sdk\const.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\sdk\entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
