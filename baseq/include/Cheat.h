@@ -32,6 +32,7 @@ private:
     HWND overlay = NULL;
     RECT client_area{};
 
+    // not entirely sure why i made this its own class
     std::unique_ptr<Memory> mem;
 };
 

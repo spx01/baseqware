@@ -16,7 +16,6 @@ Cheat::~Cheat() {
 }
 
 void Cheat::update() {
-    // this isn't supposed to be here
     this->mem->update();
 
     // determine whether the game is still running
@@ -103,7 +102,7 @@ void Cheat::update_overlay() {
     if (!(state & 0x8000) && io.MouseDown[0]) {
         io.MouseReleased[0] = true;
     }
-    io.MouseDown[0] = (state & 0x8000);
+    io.MouseDown[0] = state & 0x8000;
     POINT p;
     ::GetCursorPos(&p);
     ::ScreenToClient(overlay, &p);
