@@ -265,6 +265,10 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject,
     pDriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = IoControl;
     pDriverObject->DriverUnload = UnloadDriver;
 
+    if (pDeviceObject == NULL) {
+        PRINT("failed to create device\n");
+        return STATUS_UNSUCCESSFUL;
+    }
     pDeviceObject->Flags |= DO_DIRECT_IO;
     pDeviceObject->Flags &= ~DO_DEVICE_INITIALIZING;
     return STATUS_SUCCESS;

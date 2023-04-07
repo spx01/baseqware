@@ -8,6 +8,7 @@
 #include <imgui.h>
 
 #include "Util.h"
+
 #include "cheats/Esp.h"
 
 Cheat::Cheat(HWND overlay) {
@@ -55,7 +56,6 @@ void Cheat::update() {
         }
     }
 
-
     // determine whether the game is in focus
     HWND foreground = ::GetForegroundWindow();
     bool last_focused = this->game_focused;
@@ -99,6 +99,13 @@ void Cheat::update() {
     }
 }
 
+static void draw_esp(const std::vector<cheats::Esp::Rect> &rects) {
+    auto draw_list = ImGui::GetBackgroundDrawList();
+    for (const auto &rect: rects) {
+        draw_list->AddRectFilled({rect.x1, rect.y1}, {rect.x2, rect.y2}, IM_COL32(255, 0, 0, 255));
+    }
+}
+
 void Cheat::update_overlay() {
     if (!this->game_focused) return;
     SetWindowPos(this->overlay, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
@@ -123,12 +130,14 @@ void Cheat::update_overlay() {
     }
     ImGui::SetNextWindowPos({0, 0});
     ImGui::SetNextWindowSize({float(this->client_width()), float(this->client_height())});
-    ImGui::Begin("something", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs);
-    auto draw_list = ImGui::GetWindowDrawList();
-    draw_list->AddRectFilled({0, 0}, {100, 100}, IM_COL32(255, 0, 0, 255));
-    draw_list->AddText({300, 300}, IM_COL32(0, 25, 100, 255), "ayo what");
-    gutil::draw_text_border(draw_list, "hello world", ImVec2{800, 800}, IM_COL32(255, 255, 255, 255), ImGui::GetFont(), 30);
-    ImGui::End();
+    /* ImGui::Begin("something", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs); */
+    // just found out about background draw list
+    auto draw_list = ImGui::GetBackgroundDrawList();
+    // draw_list->AddRectFilled({0, 0}, {100, 100}, IM_COL32(255, 0, 0, 255));
+    // draw_list->AddText({300, 300}, IM_COL32(0, 25, 100, 255), "ayo what");
+    gutil::draw_text_border(draw_list, "baseqware", ImVec2{20, 0}, IM_COL32(255, 255, 255, 255), ImGui::GetFont(), 20);
+    cheats::g_esp.use_rects(draw_esp);
+    /* ImGui::End(); */
 }
 
 void Cheat::dispatch_threads() {

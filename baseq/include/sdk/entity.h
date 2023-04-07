@@ -3,7 +3,7 @@
 #include "Cheat.h"
 
 #include "sdk/const.h"
-#include "sdk/mathlib.h"
+#include "sdk/math.h"
 
 namespace sdk {
     class Entity {
@@ -36,8 +36,26 @@ namespace sdk {
             return g_c->mem->read<int>(this->addr + hazedumper::netvars::m_iTeamNum);
         }
 
-        inline bool is_enemy() const {
-            return this->get_team() != Entity(g_c->mem->get_local_player()).get_team();
+        inline uint32_t get_bones() const {
+            return g_c->mem->read<uint32_t>(this->addr + hazedumper::netvars::m_dwBoneMatrix);
+        }
+
+        std::pair<Vector, bool> get_bone_pos(int bone) const {
+            Vector res{};
+            auto bones = this->get_bones();
+            if (!bones)
+                return {res, false};
+            res.x = g_c->mem->read<float>(bones + 0x30 * bone + 0xC);
+            res.y = g_c->mem->read<float>(bones + 0x30 * bone + 0xC + 0x10);
+            res.z = g_c->mem->read<float>(bones + 0x30 * bone + 0xC + 0x20);
+            return {res, true};
+        }
+
+        uint32_t get_class_id() const {
+            auto i_client_networkable = g_c->mem->read<uint32_t>(this->addr + 0x8);
+            auto get_client_class = g_c->mem->read<uint32_t>(i_client_networkable + 2 * 0x4);
+            auto client_class = g_c->mem->read<uint32_t>(get_client_class + 0x1);
+            return g_c->mem->read<uint32_t>(client_class + 0x14);
         }
 
         /* inline bool is_visible() const {
@@ -63,10 +81,6 @@ namespace sdk {
 
         inline Vector get_eye_pos() const {
             return this->get_origin() + this->get_view_offset();
-        }
-
-        inline Vector get_bone_pos(int bone) const {
-            return g_c->mem->read<Vector>(this->addr + hazedumper::netvars::m_dwBoneMatrix + 0x30 * bone + 0xC);
         }
 
         inline Vector get_bone_pos(int bone, const sdk::VMatrix &vm) const {

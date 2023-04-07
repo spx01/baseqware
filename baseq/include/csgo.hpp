@@ -1,14 +1,12 @@
 #pragma once
-#include <cstddef>
 #include <cstdint>
 
-// 2023-02-03 18:37:44.965093600 UTC
+// 2023-04-01 09:36:05.706428700 UTC
 
 namespace hazedumper {
-    constexpr ::std::int64_t timestamp = 1675449464;
+    constexpr ::std::int64_t timestamp = 1680341765;
     namespace netvars {
-        constexpr ::std::
-                uint32_t cs_gamerules_data = 0x0;
+        constexpr ::std::uint32_t cs_gamerules_data = 0x0;
         constexpr ::std::uint32_t m_ArmorValue = 0x117CC;
         constexpr ::std::uint32_t m_Collision = 0x320;
         constexpr ::std::uint32_t m_CollisionGroup = 0x474;
@@ -119,48 +117,48 @@ namespace hazedumper {
         constexpr ::std::uint32_t dwClientState_PlayerInfo = 0x52C0;
         constexpr ::std::uint32_t dwClientState_State = 0x108;
         constexpr ::std::uint32_t dwClientState_ViewAngles = 0x4D90;
-        constexpr ::std::uint32_t dwEntityList = 0x4DFFEF4;
-        constexpr ::std::uint32_t dwForceAttack = 0x322DCFC;
-        constexpr ::std::uint32_t dwForceAttack2 = 0x322DD08;
-        constexpr ::std::uint32_t dwForceBackward = 0x322DD38;
-        constexpr ::std::uint32_t dwForceForward = 0x322DD2C;
-        constexpr ::std::uint32_t dwForceJump = 0x52BBC7C;
-        constexpr ::std::uint32_t dwForceLeft = 0x322DD44;
-        constexpr ::std::uint32_t dwForceRight = 0x322DD50;
+        constexpr ::std::uint32_t dwEntityList = 0x4DFFFC4;
+        constexpr ::std::uint32_t dwForceAttack = 0x322DDFC;
+        constexpr ::std::uint32_t dwForceAttack2 = 0x322DE08;
+        constexpr ::std::uint32_t dwForceBackward = 0x322DE50;
+        constexpr ::std::uint32_t dwForceForward = 0x322DE44;
+        constexpr ::std::uint32_t dwForceJump = 0x52BBD50;
+        constexpr ::std::uint32_t dwForceLeft = 0x322DE5C;
+        constexpr ::std::uint32_t dwForceRight = 0x322DDC0;
         constexpr ::std::uint32_t dwGameDir = 0x63AD80;
-        constexpr ::std::uint32_t dwGameRulesProxy = 0x532F4AC;
-        constexpr ::std::uint32_t dwGetAllClasses = 0xE0BFDC;
+        constexpr ::std::uint32_t dwGameRulesProxy = 0x532F56C;
+        constexpr ::std::uint32_t dwGetAllClasses = 0xE0BF8C;
         constexpr ::std::uint32_t dwGlobalVars = 0x59EE60;
-        constexpr ::std::uint32_t dwGlowObjectManager = 0x535A9C8;
-        constexpr ::std::uint32_t dwInput = 0x525D4C8;
-        constexpr ::std::uint32_t dwInterfaceLinkList = 0x99BC84;
+        constexpr ::std::uint32_t dwGlowObjectManager = 0x535AA70;
+        constexpr ::std::uint32_t dwInput = 0x525D598;
+        constexpr ::std::uint32_t dwInterfaceLinkList = 0x99C174;
         constexpr ::std::uint32_t dwLocalPlayer = 0xDEA964;
-        constexpr ::std::uint32_t dwMouseEnable = 0x5239128;
-        constexpr ::std::uint32_t dwMouseEnablePtr = 0x52390F8;
-        constexpr ::std::uint32_t dwPlayerResource = 0x322C0A0;
-        constexpr ::std::uint32_t dwRadarBase = 0x52369CC;
+        constexpr ::std::uint32_t dwMouseEnable = 0x52391F8;
+        constexpr ::std::uint32_t dwMouseEnablePtr = 0x52391C8;
+        constexpr ::std::uint32_t dwPlayerResource = 0x322C170;
+        constexpr ::std::uint32_t dwRadarBase = 0x5236A9C;
         constexpr ::std::uint32_t dwSensitivity = 0xDEEB80;
         constexpr ::std::uint32_t dwSensitivityPtr = 0xDEEB80;
         constexpr ::std::uint32_t dwSetClanTag = 0x8DA80;
-        constexpr ::std::uint32_t dwViewMatrix = 0x4DF0D24;
-        constexpr ::std::uint32_t dwWeaponTable = 0x525E5A4;
+        constexpr ::std::uint32_t dwViewMatrix = 0x4DF0DF4;
+        constexpr ::std::uint32_t dwWeaponTable = 0x525E674;
         constexpr ::std::uint32_t dwWeaponTableIndex = 0x326C;
         constexpr ::std::uint32_t dwYawPtr = 0xDEE910;
         constexpr ::std::uint32_t dwZoomSensitivityRatioPtr = 0xDF4380;
         constexpr ::std::uint32_t dwbSendPackets = 0xDD2B2;
         constexpr ::std::uint32_t dwppDirect3DDevice9 = 0xA62C0;
-        constexpr ::std::uint32_t find_hud_element = 0x56DAFBD0;
-        constexpr ::std::uint32_t force_update_spectator_glow = 0x3D91CA;
+        constexpr ::std::uint32_t find_hud_element = 0x2B940090;
+        constexpr ::std::uint32_t force_update_spectator_glow = 0x3D96FA;
         constexpr ::std::uint32_t interface_engine_cvar = 0x3FA9C;
-        constexpr ::std::uint32_t is_c4_owner = 0x3E69E0;
+        constexpr ::std::uint32_t is_c4_owner = 0x3E6F10;
         constexpr ::std::uint32_t m_bDormant = 0xED;
         constexpr ::std::uint32_t m_bIsLocalPlayer = 0x3628;
         constexpr ::std::uint32_t m_flSpawnTime = 0x103C0;
         constexpr ::std::uint32_t m_pStudioHdr = 0x2950;
-        constexpr ::std::uint32_t m_pitchClassPtr = 0x5239020;
+        constexpr ::std::uint32_t m_pitchClassPtr = 0x52390F0;
         constexpr ::std::uint32_t m_yawClassPtr = 0xDEE910;
         constexpr ::std::uint32_t model_ambient_min = 0x5A1194;
-        constexpr ::std::uint32_t set_abs_angles = 0x1E72D0;
-        constexpr ::std::uint32_t set_abs_origin = 0x1E7110;
+        constexpr ::std::uint32_t set_abs_angles = 0x1E76F0;
+        constexpr ::std::uint32_t set_abs_origin = 0x1E7530;
     }// namespace signatures
 }// namespace hazedumper

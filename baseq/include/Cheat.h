@@ -32,14 +32,13 @@ public:
     bool shutdown = false;
 
     // not entirely sure why i made this its own class
-    std::unique_ptr<Memory> mem;
+    std::unique_ptr<class Memory> mem;
 
 private:
     bool game_focused = false;
     HWND game_hwnd = NULL;
     HWND overlay = NULL;
     RECT client_area{};
-
 
     std::vector<std::thread> threads;
     void dispatch_threads();

@@ -107,13 +107,16 @@
     <ClInclude Include="include\cheats\Esp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\sdk\mathlib.h">
+    <ClInclude Include="include\sdk\math.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\sdk\const.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\sdk\entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sdk\client.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

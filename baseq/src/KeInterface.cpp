@@ -17,7 +17,6 @@ KeInterface::KeInterface() {
 
 KeInterface::~KeInterface() {
     ::CloseHandle(this->h_driver);
-    this->h_driver = NULL;
 }
 
 DWORD KeInterface::get_target_pid() {
