@@ -17,8 +17,8 @@
 
 enum class REQUESTABLE_MODULE : int {
     CLIENT_MODULE = 0,
-    /* ENGINE_MODULE,
-    VSTDLIB_MODULE,
+    ENGINE_MODULE,
+    /* VSTDLIB_MODULE,
     TIER0_MODULE, */
     _COUNT
 };

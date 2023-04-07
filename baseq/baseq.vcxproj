@@ -172,6 +172,8 @@
     <ClCompile Include="src\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
     <ClCompile Include="src\KeInterface.cpp" />
+    <ClCompile Include="src\sdk\client.cpp" />
+    <ClCompile Include="src\sdk\entity.cpp" />
     <ClCompile Include="src\Util.cpp" />
   </ItemGroup>
   <ItemGroup>

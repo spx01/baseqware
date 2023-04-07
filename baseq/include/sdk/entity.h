@@ -40,22 +40,16 @@ namespace sdk {
             return g_c->mem->read<uint32_t>(this->addr + hazedumper::netvars::m_dwBoneMatrix);
         }
 
-        std::pair<Vector, bool> get_bone_pos(int bone) const {
-            Vector res{};
-            auto bones = this->get_bones();
-            if (!bones)
-                return {res, false};
-            res.x = g_c->mem->read<float>(bones + 0x30 * bone + 0xC);
-            res.y = g_c->mem->read<float>(bones + 0x30 * bone + 0xC + 0x10);
-            res.z = g_c->mem->read<float>(bones + 0x30 * bone + 0xC + 0x20);
-            return {res, true};
+        std::pair<Vector, bool> get_bone_pos(int bone) const;
+
+        uint32_t get_class_id() const;
+
+        inline Vector get_origin() const {
+            return g_c->mem->read<Vector>(this->addr + hazedumper::netvars::m_vecOrigin);
         }
 
-        uint32_t get_class_id() const {
-            auto i_client_networkable = g_c->mem->read<uint32_t>(this->addr + 0x8);
-            auto get_client_class = g_c->mem->read<uint32_t>(i_client_networkable + 2 * 0x4);
-            auto client_class = g_c->mem->read<uint32_t>(get_client_class + 0x1);
-            return g_c->mem->read<uint32_t>(client_class + 0x14);
+        inline Vector get_view_offset() const {
+            return g_c->mem->read<Vector>(this->addr + hazedumper::netvars::m_vecViewOffset);
         }
 
         /* inline bool is_visible() const {
@@ -71,13 +65,6 @@ namespace sdk {
             return g_c->mem->read<int>(this->addr + hazedumper::netvars::m_fFlags);
         }
 
-        inline Vector get_origin() const {
-            return g_c->mem->read<Vector>(this->addr + hazedumper::netvars::m_vecOrigin);
-        }
-
-        inline Vector get_view_offset() const {
-            return g_c->mem->read<Vector>(this->addr + hazedumper::netvars::m_vecViewOffset);
-        }
 
         inline Vector get_eye_pos() const {
             return this->get_origin() + this->get_view_offset();

@@ -116,3 +116,15 @@ void gutil::draw_text_border(ImDrawList *dw, const char *text, ImVec2 pos, ImU32
     // Draw the text on top of the border
     dw->AddText(font, font_size, pos, text_color, text);
 }
+
+// github.com/b1scoito/external
+bool util::in_menu() {
+    CURSORINFO ci{};
+    ci.cbSize = sizeof(CURSORINFO);
+    if (!GetCursorInfo(&ci))
+        return false;
+    auto handle = ci.hCursor;
+    if (handle > (HCURSOR) 50000 && handle < (HCURSOR) 100000)
+        return true;
+    return false;
+}

@@ -21,7 +21,7 @@ using namespace std::literals;
 
 static bool world_to_screen(const sdk::Vector &world, const sdk::VMatrix &vm, sdk::Vector &out) {
     float w = vm.m[3][0] * world.x + vm.m[3][1] * world.y + vm.m[3][2] * world.z + vm.m[3][3];
-    if (w < 0.001f) {
+    if (w < 0.01f) {
         return false;
     }
     float x = world.x * vm[0][0] + world.y * vm[0][1] + world.z * vm[0][2] + vm[0][3];
@@ -30,10 +30,10 @@ static bool world_to_screen(const sdk::Vector &world, const sdk::VMatrix &vm, sd
     if (size.x * size.y == 0) {
         return false;
     }
-    x /= w;
-    y /= w;
-    out.x = size.x / 2.0f * x + x + size.x / 2.0f;
-    out.y = -size.y / 2.0f * y + y + size.y / 2.0f;
+    out.x = size.x / 2.0f;
+    out.y = size.y / 2.0f;
+    out.x *= 1.0f + x / w;
+    out.y *= 1.0f - y / w;
     return true;
 }
 
@@ -41,6 +41,7 @@ void cheats::Esp::run() {
     g_log->dbg(L"Esp::run()");
     std::this_thread::sleep_for(100ms);
 
+    // random ass number
     const auto k_update_time = 1s / 128;
     auto last_time = std::chrono::system_clock::now();
 
@@ -59,7 +60,6 @@ void cheats::Esp::run() {
             if (player_class_id == 0) [[unlikely]] {
                 player_class_id = local_player.get_class_id();
             }
-            auto local_player_alive = local_player.is_alive();
 
             auto vm = sdk::client::get_view_matrix();
 
@@ -70,7 +70,7 @@ void cheats::Esp::run() {
                 if (g_c->shutdown) {
                     break;
                 }
-                auto player = sdk::Entity(g_c->mem->read<uint32_t>(g_c->mem->client_base + hazedumper::signatures::dwEntityList + i * 0x10));
+                auto player = sdk::Entity(g_c->mem->read<uint32_t>(g_c->mem->client.base + hazedumper::signatures::dwEntityList + i * 0x10));
                 if (!player) {
                     continue;
                 }
@@ -89,15 +89,20 @@ void cheats::Esp::run() {
                 if (player.get_team() == local_team) {
                     continue;
                 }
+                // head bone
                 auto [head, success] = player.get_bone_pos(8);
                 if (!success) {
                     continue;
                 }
-                sdk::Vector screen;
-                if (!world_to_screen(head, vm, screen)) {
+                sdk::Vector feet = player.get_origin();
+                sdk::Vector s_top{}, s_bot{};
+                if (!world_to_screen(head, vm, s_top) || !world_to_screen(feet, vm, s_bot)) {
                     continue;
                 }
-                g_esp.rects_private->push_back(Rect{screen.x - 10.f, screen.y - 30.f, screen.x + 10.f, screen.y + 30.f, 4});
+                float ratio = 0.7f;
+                float h = s_bot.y - s_top.y;
+                float w = h * ratio;
+                g_esp.rects_private->push_back(Rect{s_top.x - w / 2.f, s_top.y, s_top.x + w / 2.f, s_bot.y, 1});
             }
         }
     TIMING:

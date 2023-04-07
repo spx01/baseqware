@@ -62,6 +62,7 @@ void MainThread() {
     ::SetLayeredWindowAttributes(overlay, RGB(0, 0, 0), 0xff, LWA_ALPHA);
     ::ShowWindow(overlay, SW_SHOW);
     ::UpdateWindow(overlay);
+    ::Sleep(100);
     g_c = std::make_unique<Cheat>(overlay);
 
     if (!CreateDeviceD3D(overlay)) {
@@ -124,15 +125,14 @@ void MainThread() {
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
+    CleanupDeviceD3D();
+    ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
 
     // manual cleanup since raii doesn't really work for globals
     // we need to keep the pointer valid for destruction, therefore cannot use reset
     g_c.get_deleter()(g_c.get());
     g_c.release();
     g_log.reset();
-
-    CleanupDeviceD3D();
-    ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
 }
 
 // --- boilerplate ---

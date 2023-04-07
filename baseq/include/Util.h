@@ -9,6 +9,7 @@
 #include <imgui.h>
 
 namespace util {
+    bool in_menu();
 }
 
 // pretend this is a singleton

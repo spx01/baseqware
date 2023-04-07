@@ -8,8 +8,8 @@
 
 typedef enum _REQUESTABLE_MODULE {
     CLIENT_MODULE = 0,
-    /* ENGINE_MODULE,
-    VSTDLIB_MODULE,
+    ENGINE_MODULE,
+    /* VSTDLIB_MODULE,
     TIER0_MODULE, */
     _RM_MODULE_COUNT,
     _RM_FORCE_SIZE = INT_MAX,
@@ -17,7 +17,9 @@ typedef enum _REQUESTABLE_MODULE {
 
 PCWSTR kModulePaths[_RM_MODULE_COUNT] = {
         L"\\csgo\\bin\\client.dll",
-};
+        L"\\bin\\engine.dll"};
+
+PCWSTR kExePath = L"\\csgo.exe";
 
 ULONG ModuleAddresses[_RM_MODULE_COUNT];
 ULONG ModuleSizes[_RM_MODULE_COUNT];
@@ -31,7 +33,7 @@ ULONG ModuleSizes[_RM_MODULE_COUNT];
 // Request to retrieve the base address of client.dll in csgo.exe from kernel space
 #define IO_GET_MODULE_REQUEST CTL_CODE(FILE_DEVICE_UNKNOWN, 0x0694 /* Our Custom Code */, METHOD_BUFFERED, FILE_SPECIAL_ACCESS)
 
-#define PRINT(x, ...) DbgPrintEx(0, 0, "[PASED] " x, __VA_ARGS__)
+#define PRINT(x, ...) DbgPrintEx(0, 0, "[PASED][INF] " x, __VA_ARGS__)
 #ifdef _DEBUG
 #define DEBUG(x, ...) DbgPrintEx(0, 0, "[PASED][DBG] " x, __VA_ARGS__)
 #else
@@ -46,7 +48,6 @@ ULONG csgoId;
 // datatype for read request
 typedef struct _KERNEL_READ_REQUEST {
     ULONG ProcessId;
-
     ULONG Address;
     ULONG Response;
     ULONG Size;
@@ -55,7 +56,6 @@ typedef struct _KERNEL_READ_REQUEST {
 
 typedef struct _KERNEL_WRITE_REQUEST {
     ULONG ProcessId;
-
     ULONG Address;
     ULONG Value;
     ULONG Size;
@@ -99,14 +99,21 @@ NTSTATUS KeWriteVirtualMemory(PEPROCESS Process, PVOID SourceAddress, PVOID Targ
 // then find the client.dll & csgo.exe using the callback
 PLOAD_IMAGE_NOTIFY_ROUTINE ImageLoadCallback(PUNICODE_STRING FullImageName,
                                              HANDLE ProcessId, PIMAGE_INFO ImageInfo) {
-    // Compare our string to input
+    // the exe gets loaded first, so we can use it to then check the process id for the other modules
+    // because besides client.dll, the modules have pretty generic paths
+    if (wcsstr(FullImageName->Buffer, kExePath)) {
+        DEBUG("found csgo.exe\n");
+        csgoId = ProcessId;
+        return;
+    }
+    if (csgoId != ProcessId) {
+        return;
+    }
     for (int i = 0; i < _RM_MODULE_COUNT; ++i) {
         if (wcsstr(FullImageName->Buffer, kModulePaths[i])) {
             ModuleAddresses[i] = ImageInfo->ImageBase;
             ModuleSizes[i] = ImageInfo->ImageSize;
-            csgoId = ProcessId;
             DEBUG("loaded name: %ls\n", FullImageName->Buffer);
-            DEBUG("found pid: %d\n", (DWORD) ProcessId);
         }
     }
 }
@@ -168,7 +175,7 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
         PULONG OutPut = (PULONG) Irp->AssociatedIrp.SystemBuffer;
         *OutPut = csgoId;
 
-        DEBUG("id get %#010x\n", csgoId);
+        // DEBUG("id get %#010x\n", csgoId);
         Status = STATUS_SUCCESS;
         BytesIO = sizeof(*OutPut);
     } else if (ControlCode == IO_GET_MODULE_REQUEST) {
