@@ -26,10 +26,24 @@ enum class REQUESTABLE_MODULE : int {
 struct KERNEL_READ_REQUEST {
     ULONG pid;
     ULONG addr;
-    ULONG out;
     ULONG size;
+    ULONGLONG out[1];
 };
 using PKERNEL_READ_REQUEST = KERNEL_READ_REQUEST *;
+
+template<typename T>
+struct KernelReadWrapper {
+    ULONG pid;
+    ULONG addr;
+    ULONG size;
+    ULONGLONG out[(sizeof(T) + 7) / 8];
+
+    KernelReadWrapper(ULONG pid, ULONG addr) {
+        this->pid = pid;
+        this->addr = addr;
+        this->size = sizeof(T);
+    }
+};
 
 struct KERNEL_WRITE_REQUEST {
     ULONG pid;
@@ -53,11 +67,7 @@ public:
 
     template<typename T>
     std::pair<T, bool> read(ULONG pid, ULONG addr, ULONG size = sizeof(T)) const {
-        KERNEL_READ_REQUEST req = {
-                .pid = pid,
-                .addr = addr,
-                .out = 0,
-                .size = size};
+        KernelReadWrapper<T> req(pid, addr);
         DWORD bytes;
         if (!::DeviceIoControl(this->h_driver, IO_READ_REQUEST, &req, sizeof(req), &req, sizeof(req), &bytes, NULL))
             return {T{}, false};

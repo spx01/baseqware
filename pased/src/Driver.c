@@ -49,8 +49,8 @@ ULONG csgoId;
 typedef struct _KERNEL_READ_REQUEST {
     ULONG ProcessId;
     ULONG Address;
-    ULONG Response;
     ULONG Size;
+    ULONGLONG Response[];
 
 } KERNEL_READ_REQUEST, *PKERNEL_READ_REQUEST;
 
@@ -144,19 +144,18 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
     if (ControlCode == IO_READ_REQUEST) {
         // Get the input buffer & format it to our struct
         PKERNEL_READ_REQUEST ReadInput = (PKERNEL_READ_REQUEST) Irp->AssociatedIrp.SystemBuffer;
-        PKERNEL_READ_REQUEST ReadOutput = (PKERNEL_READ_REQUEST) Irp->AssociatedIrp.SystemBuffer;
 
         PEPROCESS Process;
         // Get our process
         if (NT_SUCCESS(PsLookupProcessByProcessId(ReadInput->ProcessId, &Process)))
             KeReadVirtualMemory(Process, ReadInput->Address,
-                                &ReadInput->Response, ReadInput->Size);
+                                ReadInput->Response, ReadInput->Size);
 
         //DbgPrintEx(0, 0, "Read Params:  %lu, %#010x \n", ReadInput->ProcessId, ReadInput->Address);
         //DbgPrintEx(0, 0, "Value: %lu \n", ReadOutput->Response);
 
         Status = STATUS_SUCCESS;
-        BytesIO = sizeof(KERNEL_READ_REQUEST);
+        BytesIO = sizeof(KERNEL_READ_REQUEST) + ReadInput->Size;
     } else if (ControlCode == IO_WRITE_REQUEST) {
         // Get the input buffer & format it to our struct
         PKERNEL_WRITE_REQUEST WriteInput = (PKERNEL_WRITE_REQUEST) Irp->AssociatedIrp.SystemBuffer;
