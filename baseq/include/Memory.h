@@ -23,17 +23,6 @@ public:
     inline bool is_valid() const { return this->valid; }
     template<typename T>
     inline T read(uint32_t addr) const {
-        // TODO: multiread for anything
-        // (but don't forget to check if address is aligned to 4 I suppose?)
-        if constexpr (std::is_same_v<T, sdk::Vector>) {
-            return this->read_vec(addr);
-        } else if constexpr (sizeof(T) > 4) {
-            // c++20 approved!!!!
-            []<bool f = false>() {
-                static_assert(f);
-            }
-            ();
-        }
 #ifdef _DEBUG
         // FIXME
         if (addr < std::min(this->client.base, this->engine.base)) {
@@ -73,7 +62,6 @@ public:
     ModuleInfo engine{};
 
 private:
-    sdk::Vector read_vec(uint32_t addr) const;
     KeInterface ki;
     bool valid = true;
 };

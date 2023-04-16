@@ -24,11 +24,3 @@ void Memory::update() {
         std::tie(this->engine.base, this->engine.size) = this->ki.get_module(REQUESTABLE_MODULE::ENGINE_MODULE);
     }
 }
-
-sdk::Vector Memory::read_vec(uint32_t addr) const {
-    sdk::Vector res{};
-    res.x = this->read<float>(addr);
-    res.y = this->read<float>(addr + 4);
-    res.z = this->read<float>(addr + 8);
-    return res;
-}
