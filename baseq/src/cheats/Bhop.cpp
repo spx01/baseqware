@@ -43,16 +43,14 @@ void cheats::Bhop::run() {
         static float fun_elapsed;
         static bool in_bhop;
 
-        auto tick_cnt = BW_ENGINE_READ_GLOBAL(iTickCount);
-        auto frame_cnt = BW_ENGINE_READ_GLOBAL(iFrameCount);
-        auto interval_per_tick = BW_ENGINE_READ_GLOBAL(flIntervalPerTick);
-        if (!(tick_cnt != last_tick || frame_cnt != last_frame)) {
-            util::sleep(interval_per_tick);
+        auto g = sdk::engine::get_global_vars();
+        if (!(g.iTickCount != last_tick || g.iFrameCount != last_frame)) {
+            util::sleep(g.flIntervalPerTick);
             continue;
         }
 
-        auto frametime = BW_ENGINE_READ_GLOBAL(flAbsFrameTime);
-        auto delay = fun_elapsed - (frametime < interval_per_tick ? (frametime * 0.5f) : frametime);
+        const auto frametime = g.flAbsFrameTime;
+        auto delay = fun_elapsed - (frametime < g.flIntervalPerTick ? (frametime * 0.5f) : frametime);
         auto sleep = std::min(delay, frametime * 1000);
         util::sleep(sleep);
 
@@ -90,8 +88,8 @@ void cheats::Bhop::run() {
 
 
         auto end = std::chrono::high_resolution_clock::now();
-        last_tick = tick_cnt;
-        last_frame = frame_cnt;
+        last_tick = g.iTickCount;
+        last_frame = g.iFrameCount;
         fun_elapsed = float((end - start).count());
     }
     g_log->dbg(L"Bhop::run(): Exiting");
