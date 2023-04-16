@@ -7,6 +7,7 @@
 
 #include "Cheat.h"
 #include "Config.h"
+#include "Globals.h"
 #include "Memory.h"
 #include "Util.h"
 
@@ -14,6 +15,7 @@
 #include "sdk/const.h"
 #include "sdk/entity.h"
 #include "sdk/math.h"
+#include "sdk/misc.h"
 
 #include <imgui.h>
 
@@ -51,21 +53,20 @@ void cheats::Esp::run() {
     while (!g_c->shutdown) {
         // make the timing consistent in the future
         // probably not a huge deal but this is just cringe
-        auto local_player = sdk::Entity(sdk::client::get_local_player());
-        if (!local_player) {
+        if (!globals::local or (!g_cfg.esp.enabled and !::GetAsyncKeyState(VK_MENU))) {
             goto TIMING;
         }
         {
-            auto local_team = local_player.get_team();
+            auto local_team = globals::local.get_team();
             if (player_class_id == 0) [[unlikely]] {
-                player_class_id = local_player.get_class_id();
+                player_class_id = globals::local.get_class_id();
             }
 
             auto vm = sdk::client::get_view_matrix();
 
             std::lock_guard lck(g_esp.rects_mutex);
             g_esp.rects_private->clear();
-            for (int i = 1; i < 32; ++i) {
+            for (int i = 1; i < 64; ++i) {
                 // in the case of weird memory stuff
                 if (g_c->shutdown) {
                     break;
@@ -74,7 +75,7 @@ void cheats::Esp::run() {
                 if (!player) {
                     continue;
                 }
-                if (player.get() == local_player.get()) {
+                if (player.get() == globals::local.get()) {
                     continue;
                 }
                 if (player.get_class_id() != player_class_id) {
@@ -90,7 +91,7 @@ void cheats::Esp::run() {
                     continue;
                 }
                 // head bone
-                auto [head, success] = player.get_bone_pos(8);
+                auto [head, success] = player.get_bone_pos(int(sdk::Bones::Head));
                 if (!success) {
                     continue;
                 }
@@ -102,7 +103,7 @@ void cheats::Esp::run() {
                 float ratio = 0.7f;
                 float h = s_bot.y - s_top.y;
                 float w = h * ratio;
-                g_esp.rects_private->push_back(Rect{s_top.x - w / 2.f, s_top.y, s_top.x + w / 2.f, s_bot.y, 1});
+                g_esp.rects_private->push_back(Rect{s_top.x - w / 2.f, s_top.y, s_top.x + w / 2.f, s_bot.y});
             }
         }
     TIMING:

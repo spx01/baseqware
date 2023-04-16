@@ -7,12 +7,19 @@
 
 #include <imgui.h>
 
+#include "Config.h"
+#include "Globals.h"
 #include "Util.h"
 
 #include "cheats/Esp.h"
+#include "cheats/Triggerbot.h"
 
 Cheat::Cheat(HWND overlay) {
     this->mem = std::make_unique<Memory>();
+    if (!this->mem->is_valid()) {
+        this->shutdown = true;
+        return;
+    }
     this->overlay = overlay;
     this->dispatch_threads();
 }
@@ -21,6 +28,7 @@ Cheat::~Cheat() {
     for (auto &thread: this->threads) {
         thread.join();
     }
+    ::DestroyWindow(this->overlay);
 }
 
 void Cheat::update() {
@@ -145,19 +153,20 @@ void Cheat::update_overlay() {
             ::ShowWindow(this->overlay, SW_HIDE);
             ::UpdateWindow(this->overlay);
         }
+        ImGui::Checkbox("esp", &g_cfg.esp.enabled);
+        ImGui::Checkbox("triggerbot", &g_cfg.trigger.enabled);
+        ImGui::Checkbox("bhop", &g_cfg.bhop.enabled);
         ImGui::End();
     }
-    // just found out about background draw list
-    /*
-        ImGui::SetNextWindowPos({0, 0});
-        ImGui::SetNextWindowSize({float(this->client_width()), float(this->client_height())});
-        ImGui::Begin("something", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs);
-    */
-    if (!util::in_menu()) {
+
+    if (!util::in_menu() && (g_cfg.esp.enabled || ::GetAsyncKeyState(VK_MENU) & 0x8000)) {
         cheats::g_esp.use_rects(draw_esp);
     }
 }
 
 void Cheat::dispatch_threads() {
+    this->threads.emplace_back(globals::run);
     this->threads.emplace_back(cheats::Esp::run);
+    this->threads.emplace_back(cheats::Triggerbot::run);
+    this->threads.emplace_back(cheats::Bhop::run);
 }

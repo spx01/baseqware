@@ -159,8 +159,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\cheats\Bhop.cpp" />
     <ClCompile Include="src\cheats\Esp.cpp" />
     <ClCompile Include="src\Config.cpp" />
+    <ClCompile Include="src\Globals.cpp" />
     <ClCompile Include="src\Memory.cpp" />
     <ClCompile Include="src\Cheat.cpp" />
     <ClCompile Include="src\imgui\imgui_impl_dx11.cpp" />
@@ -174,15 +176,18 @@
     <ClCompile Include="src\KeInterface.cpp" />
     <ClCompile Include="src\sdk\client.cpp" />
     <ClCompile Include="src\sdk\entity.cpp" />
+    <ClCompile Include="src\cheats\Triggerbot.cpp" />
     <ClCompile Include="src\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-format" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\cheats\Bhop.h" />
     <ClInclude Include="include\Config.h" />
     <ClInclude Include="include\Cheat.h" />
     <ClInclude Include="include\cheats\Esp.h" />
+    <ClInclude Include="include\Globals.h" />
     <ClInclude Include="include\imconfig.h" />
     <ClInclude Include="include\imgui.h" />
     <ClInclude Include="include\imgui_impl_dx11.h" />
@@ -193,9 +198,12 @@
     <ClInclude Include="include\imstb_truetype.h" />
     <ClInclude Include="include\KeInterface.h" />
     <ClInclude Include="include\sdk\client.h" />
+    <ClInclude Include="include\sdk\engine.h" />
     <ClInclude Include="include\sdk\entity.h" />
     <ClInclude Include="include\sdk\const.h" />
     <ClInclude Include="include\sdk\math.h" />
+    <ClInclude Include="include\sdk\misc.h" />
+    <ClInclude Include="include\cheats\Triggerbot.h" />
     <ClInclude Include="include\Util.h" />
     <ClInclude Include="include\Memory.h" />
     <ClInclude Include="include\csgo.hpp" />

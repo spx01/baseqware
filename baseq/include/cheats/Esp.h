@@ -17,7 +17,6 @@ namespace cheats {
             float x1, y1;
             // bottom right
             float x2, y2;
-            int thickness;
         };
 
         template<typename F>

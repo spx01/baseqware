@@ -7,7 +7,7 @@
 Memory::Memory() : ki() {
     if (this->ki.is_invalid()) {
         g_log->err(L"Kernel interface failed to initialize; is driver running?");
-        return;
+        this->valid = false;
     }
 }
 

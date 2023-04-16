@@ -63,6 +63,15 @@
     <ClCompile Include="src\sdk\entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Globals.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cheats\Bhop.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cheats\Triggerbot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-format" />
@@ -123,6 +132,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\sdk\client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Globals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sdk\engine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sdk\misc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cheats\Bhop.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cheats\Triggerbot.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

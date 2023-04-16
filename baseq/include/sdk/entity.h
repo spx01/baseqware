@@ -8,6 +8,7 @@
 namespace sdk {
     class Entity {
     public:
+        Entity() = default;
         Entity(uint32_t addr) {
             this->addr = addr;
         }
@@ -32,8 +33,8 @@ namespace sdk {
             return g_c->mem->read<bool>(this->addr + hazedumper::signatures::m_bDormant);
         }
 
-        inline int get_team() const {
-            return g_c->mem->read<int>(this->addr + hazedumper::netvars::m_iTeamNum);
+        inline uint32_t get_team() const {
+            return g_c->mem->read<uint32_t>(this->addr + hazedumper::netvars::m_iTeamNum);
         }
 
         inline uint32_t get_bones() const {
@@ -52,19 +53,22 @@ namespace sdk {
             return g_c->mem->read<Vector>(this->addr + hazedumper::netvars::m_vecViewOffset);
         }
 
-        /* inline bool is_visible() const {
-            return this->get_flags() & FL::FL_ONGROUND;
+        inline uint32_t get_crosshair_id() const {
+            return g_c->mem->read<uint32_t>(this->addr + hazedumper::netvars::m_iCrosshairId);
         }
 
+        inline uint32_t get_flags() const {
+            return g_c->mem->read<uint32_t>(this->addr + hazedumper::netvars::m_fFlags);
+        }
+
+        inline MOVETYPE get_move_type() const {
+            return g_c->mem->read<MOVETYPE>(this->addr + hazedumper::netvars::m_MoveType);
+        }
+
+        /*
         inline int get_health() const {
             return g_c->mem->read<int>(this->addr + hazedumper::netvars::m_iHealth);
         }
-
-
-        inline int get_flags() const {
-            return g_c->mem->read<int>(this->addr + hazedumper::netvars::m_fFlags);
-        }
-
 
         inline Vector get_eye_pos() const {
             return this->get_origin() + this->get_view_offset();
@@ -87,6 +91,6 @@ namespace sdk {
         } */
 
     private:
-        uint32_t addr;
+        uint32_t addr = 0;
     };
 }// namespace sdk

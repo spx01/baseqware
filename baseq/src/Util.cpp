@@ -63,8 +63,10 @@ Logger::~Logger() {
     (void) getchar();
     fclose(stdout);
     fclose(stdin);
-    fputws(L"exit\n", this->fp);
-    fclose(this->fp);
+    if (this->fp) {
+        fputws(L"exit\n", this->fp);
+        fclose(this->fp);
+    }
     ::FreeConsole();
 }
 

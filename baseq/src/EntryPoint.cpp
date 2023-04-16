@@ -122,17 +122,21 @@ void MainThread() {
         g_pSwapChain->Present(1, 0);
     }
 
-    ImGui_ImplDX11_Shutdown();
-    ImGui_ImplWin32_Shutdown();
-    ImGui::DestroyContext();
-    CleanupDeviceD3D();
-    ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+    ::ShowWindow(tmgr, SW_SHOW);
+    ::UpdateWindow(tmgr);
 
     // manual cleanup since raii doesn't really work for globals
     // we need to keep the pointer valid for destruction, therefore cannot use reset
     g_c.get_deleter()(g_c.get());
     g_c.release();
-    g_log.reset();
+    g_log.get_deleter()(g_log.get());
+    g_log.release();
+
+    ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+    ImGui_ImplDX11_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
+    CleanupDeviceD3D();
 }
 
 // --- boilerplate ---
@@ -147,9 +151,9 @@ BOOL APIENTRY DllMain(HANDLE hModule,
                       DWORD reason,
                       LPVOID) {
     if (reason == DLL_PROCESS_ATTACH) {
-        auto handle = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE) &MainThreadWrapper, hModule, NULL, NULL);
+        auto handle = ::CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE) &MainThreadWrapper, hModule, NULL, NULL);
         if (handle) {
-            CloseHandle(handle);
+            ::CloseHandle(handle);
         }
     }
     return TRUE;
