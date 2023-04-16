@@ -47,9 +47,6 @@ void cheats::Esp::run() {
     const auto k_update_time = 1s / 128;
     auto last_time = std::chrono::system_clock::now();
 
-    // lazy hack
-    uint32_t player_class_id = 0;
-
     while (!g_c->shutdown) {
         // make the timing consistent in the future
         // probably not a huge deal but this is just cringe
@@ -58,9 +55,6 @@ void cheats::Esp::run() {
         }
         {
             auto local_team = globals::local.get_team();
-            if (player_class_id == 0) [[unlikely]] {
-                player_class_id = globals::local.get_class_id();
-            }
 
             auto vm = sdk::client::get_view_matrix();
 
@@ -78,7 +72,7 @@ void cheats::Esp::run() {
                 if (player.get() == globals::local.get()) {
                     continue;
                 }
-                if (player.get_class_id() != player_class_id) {
+                if (player.get_class_id() != globals::local_class) {
                     continue;
                 }
                 if (!player.is_alive()) {

@@ -57,10 +57,12 @@ Logger::Logger(const char *filename) {
 
 Logger::~Logger() {
     ::SetConsoleTextAttribute(this->m_con_out, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
+#ifndef NDEBUG
     fputws(L"\nPress ENTER to exit\n", stdout);
     FILE *f;
     freopen_s(&f, "CONIN$", "r", stdin);
     (void) getchar();
+#endif
     fclose(stdout);
     fclose(stdin);
     if (this->fp) {
@@ -129,4 +131,37 @@ bool util::in_menu() {
     if (handle > (HCURSOR) 50000 && handle < (HCURSOR) 100000)
         return true;
     return false;
+}
+
+// https://github.com/b1scoito/external/blob/main/external/utils.hpp
+// precise sleep
+void util::sleep(float ms) {
+    static HMODULE ntdll = [] {
+        return ::GetModuleHandleW(L"ntdll.dll");
+    }();
+
+    typedef NTSTATUS(WINAPI * fnNtDelayExecution)(BOOL Alertable, PLARGE_INTEGER DelayInterval);
+    static fnNtDelayExecution oNtDelayExecution = NULL;
+
+    if (!oNtDelayExecution)
+        oNtDelayExecution = (fnNtDelayExecution) GetProcAddress(ntdll, "NtDelayExecution");
+
+    typedef NTSTATUS(WINAPI * fnZwSetTimerResolution)(IN ULONG RequestedResolution, IN BOOLEAN Set, OUT PULONG ActualResolution);
+    static fnZwSetTimerResolution oZwSetTimerResolution = NULL;
+
+    if (!oZwSetTimerResolution)
+        oZwSetTimerResolution = (fnZwSetTimerResolution) GetProcAddress(ntdll, "ZwSetTimerResolution");
+
+    static std::once_flag flag;
+    std::call_once(flag, []() {
+            ULONG current;
+            oZwSetTimerResolution( (ULONG)(0.5f * 10000.f), true, &current ); });
+
+    if (ms < 0.5f)
+        ms = 0.5f;
+
+    LARGE_INTEGER time = {};
+    time.QuadPart = -1 * (LONGLONG) (ms * 10000.f);
+
+    oNtDelayExecution(false, &time);
 }

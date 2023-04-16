@@ -28,6 +28,10 @@ public:
         return {this->client_area.left, this->client_area.top};
     }
 
+    inline bool is_focused() const {
+        return this->game_focused;
+    }
+
     // used to shut down all the cheat threads
     bool shutdown = false;
 
