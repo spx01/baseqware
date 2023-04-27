@@ -30,8 +30,6 @@ void cheats::Bhop::run() {
     g_log->dbg(L"Bhop::run()");
     std::this_thread::sleep_for(100ms);
 
-    // FIXME: timing
-    // this isn't 100% consistent becuase it's not synced with the game in any way
     while (!g_c->shutdown) {
         if (!g_cfg.bhop.enabled || !globals::local || !globals::local.is_alive() || util::in_menu() || !sdk::engine::in_game() || !g_c->is_focused()) {
             ::Sleep(5);

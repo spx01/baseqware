@@ -23,7 +23,6 @@ void globals::run() {
 
         // FIXME
         globals::local = client::get_local_player();
-        local_class = globals::local.get_class_id();
 
         if (!globals::local) {
             globals::local = client::get_local_player();

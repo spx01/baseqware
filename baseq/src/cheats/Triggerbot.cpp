@@ -49,7 +49,7 @@ void cheats::Triggerbot::run() {
         }
 
         auto player = sdk::Entity(g_c->mem->read<uint32_t>(g_c->mem->client.base + hazedumper::signatures::dwEntityList + (cid - 1) * 0x10));
-        if (!player || player.get_class_id() != globals::local_class || !player.is_alive()) {
+        if (!player || player.get_class_id() != sdk::CID::CCSPlayer || !player.is_alive()) {
             ::Sleep(2);
             continue;
         }
