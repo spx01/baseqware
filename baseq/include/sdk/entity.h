@@ -2,6 +2,7 @@
 
 #include "Cheat.h"
 
+#include "sdk/classes.h"
 #include "sdk/const.h"
 #include "sdk/math.h"
 
@@ -43,7 +44,7 @@ namespace sdk {
 
         std::pair<Vector, bool> get_bone_pos(int bone) const;
 
-        uint32_t get_class_id() const;
+        CID get_class_id() const;
 
         inline Vector get_origin() const {
             return g_c->mem->read<Vector>(this->addr + hazedumper::netvars::m_vecOrigin);

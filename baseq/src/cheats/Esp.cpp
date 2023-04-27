@@ -11,6 +11,7 @@
 #include "Memory.h"
 #include "Util.h"
 
+#include "sdk/classes.h"
 #include "sdk/client.h"
 #include "sdk/const.h"
 #include "sdk/entity.h"
@@ -72,7 +73,7 @@ void cheats::Esp::run() {
                 if (player.get() == globals::local.get()) {
                     continue;
                 }
-                if (player.get_class_id() != globals::local_class) {
+                if (player.get_class_id() != sdk::CID::CCSPlayer) {
                     continue;
                 }
                 if (!player.is_alive()) {

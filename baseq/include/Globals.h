@@ -4,6 +4,6 @@
 
 namespace globals {
     inline sdk::Entity local;
-    inline uint32_t local_class;
+    inline sdk::CID local_class;
     void run();
 }// namespace globals
