@@ -13,6 +13,7 @@ namespace sdk {{
 """
 dest = "include/sdk/classes.h"
 
+
 def main():
     tn = telnetlib.Telnet(game_host, game_port)
     tn.write(b"sv_dump_class_info; echo ##DONE##\n")
@@ -21,7 +22,7 @@ def main():
     lines[0] = lines[0][:-1] + " = 0,"
     with open(dest, "wt") as f:
         f.write(body.format("\n".join(lines)))
-    
-    
+
+
 if __name__ == "__main__":
     main()
