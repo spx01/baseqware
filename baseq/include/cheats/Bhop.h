@@ -2,7 +2,7 @@
 
 namespace cfg {
     struct Bhop {
-        bool enabled = true;
+        bool enabled = false;
     };
 }// namespace cfg
 

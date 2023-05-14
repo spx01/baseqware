@@ -50,6 +50,10 @@ namespace sdk {
             return g_c->mem->read<Vector>(this->addr + hazedumper::netvars::m_vecOrigin);
         }
 
+        inline Vector get_velocity() const {
+            return g_c->mem->read<Vector>(this->addr + hazedumper::netvars::m_vecVelocity);
+        }
+
         inline Vector get_view_offset() const {
             return g_c->mem->read<Vector>(this->addr + hazedumper::netvars::m_vecViewOffset);
         }

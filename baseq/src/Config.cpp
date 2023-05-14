@@ -20,5 +20,7 @@ KeyBind::operator bool() {
                 this->last_pressed = false;
             }
             return this->invert != this->toggled;
+        default:
+            return false;
     }
 }

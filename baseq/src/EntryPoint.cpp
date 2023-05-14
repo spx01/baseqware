@@ -79,6 +79,22 @@ void MainThread() {
     ImGui::CreateContext();
     ImGui_ImplWin32_EnableDpiAwareness();
     ImGui::StyleColorsDark();
+    auto &style = ImGui::GetStyle();
+    style.WindowTitleAlign = ImVec2(0.5f, 0.5f);
+    style.SelectableTextAlign = ImVec2(0.5f, 0.5f);
+    style.ItemSpacing = ImVec2(20.f, 6.f);
+    style.ItemInnerSpacing = ImVec2(10.f, 4.f);
+    style.WindowRounding = 9.f;
+    style.FrameRounding = 2.f;
+    style.TabRounding = 2.f;
+    style.AntiAliasedFill = true;
+    style.AntiAliasedLines = true;
+    style.FramePadding.x = 20.f;
+    auto *colors = style.Colors;
+    float big_scale = 2.f;
+    style.ScaleAllSizes(big_scale);
+    colors[ImGuiCol_TitleBg] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
+    colors[ImGuiCol_TitleBgActive] = ImVec4(0.06f, 0.06f, 0.06f, 1.00f);
 
     ImGui_ImplWin32_Init(overlay);
     ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
@@ -88,7 +104,7 @@ void MainThread() {
     cfg.OversampleH = 3;
     cfg.OversampleV = 1;
     cfg.PixelSnapH = true;
-    io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 24, &cfg);
+    io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", floor(18.f * big_scale), &cfg);
 
     while (true) {
         // listen for when we should stop

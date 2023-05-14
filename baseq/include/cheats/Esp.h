@@ -5,7 +5,7 @@
 
 namespace cfg {
     struct Esp {
-        bool enabled = true;
+        bool enabled = false;
     };
 }// namespace cfg
 

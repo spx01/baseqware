@@ -26,9 +26,22 @@ void jump() {
     ::SendInput(1, &input, sizeof(INPUT));
 }
 
+void duck() {
+    // FIXME: scrollwheel emulation + configuration
+    INPUT input{};
+    input.type = INPUT_KEYBOARD;
+    // TODO: implement key pool and use telnet
+    input.ki.wVk = VK_CONTROL;
+    input.ki.wScan = ::MapVirtualKey(VK_CONTROL, MAPVK_VK_TO_VSC);
+    ::SendInput(1, &input, sizeof(INPUT));
+    ::Sleep(1000 / 64);
+    input.ki.dwFlags = KEYEVENTF_KEYUP;
+    ::SendInput(1, &input, sizeof(INPUT));
+}
+
 void cheats::Bhop::run() {
     g_log->dbg(L"Bhop::run()");
-    std::this_thread::sleep_for(100ms);
+    std::this_thread::sleep_for(200ms);
 
     while (!g_c->shutdown) {
         if (!g_cfg.bhop.enabled || !globals::local || !globals::local.is_alive() || util::in_menu() || !sdk::engine::in_game() || !g_c->is_focused()) {
@@ -49,7 +62,7 @@ void cheats::Bhop::run() {
 
         const auto frametime = g.flAbsFrameTime;
         auto delay = fun_elapsed - (frametime < g.flIntervalPerTick ? (frametime * 0.5f) : frametime);
-        auto sleep = std::min(delay, frametime * 1000);
+        auto sleep = std::min(std::max(delay, 0.f), frametime * 1000);
         util::sleep(sleep);
 
         auto start = std::chrono::high_resolution_clock::now();
@@ -57,6 +70,34 @@ void cheats::Bhop::run() {
         auto move_type = globals::local.get_move_type();
         if (move_type == sdk::MOVETYPE::LADDER || move_type == sdk::MOVETYPE::NOCLIP || move_type == sdk::MOVETYPE::OBSERVER) {
             continue;
+        }
+
+        // something something crash in debug mode something something
+        static float h;
+        static int land_tick;
+        if (g.iTickCount != last_tick) {
+            if (land_tick == g.iTickCount + 2) {
+                duck();
+            }
+            if (land_tick == g.iTickCount) {
+                g_log->info(L"land");
+                land_tick = 0;
+            }
+            if (!(globals::local.get_flags() & sdk::FL::ONGROUND)) {
+                auto vel = globals::local.get_velocity();
+                if (vel.z >= -12.5f && vel.z <= 0.f) {
+                    g_log->info(L"no vertical vel");
+                    float dh = globals::local.get_origin().z - h;
+                    if (dh > 0.f) {
+                        float t = (vel.z + sqrt(vel.z * vel.z + 2 * 800 * dh)) / 800.f;
+                        int dt = ceil(t * 64);
+                        g_log->info(L"dt: {}", dt);
+                        land_tick = g.iTickCount + dt;
+                    }
+                }
+            } else {
+                h = globals::local.get_origin().z;
+            }
         }
 
         // FIXME

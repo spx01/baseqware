@@ -26,6 +26,8 @@ void shoot() {
 // TODO: refactor everything
 void cheats::Triggerbot::run() {
     g_log->dbg(L"Triggerbot::run()");
+    std::this_thread::sleep_for(200ms);
+
     while (!g_c->shutdown) {
         if (!globals::local or !g_cfg.trigger.enabled or !::GetAsyncKeyState(VK_MENU)) {
             ::Sleep(2);

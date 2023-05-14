@@ -11,9 +11,8 @@ using namespace sdk;
 void globals::run() {
     // we don't need this to be fast
     const auto k_delay_time = 1s / 10;
-    while (!g_c) {
-        ::Sleep(100);
-    }
+    std::this_thread::sleep_for(100ms);
+
     while (!g_c->shutdown) {
         if (!engine::in_game()) {
             globals::local = Entity{};

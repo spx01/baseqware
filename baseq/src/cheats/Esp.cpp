@@ -42,7 +42,7 @@ static bool world_to_screen(const sdk::Vector &world, const sdk::VMatrix &vm, sd
 
 void cheats::Esp::run() {
     g_log->dbg(L"Esp::run()");
-    std::this_thread::sleep_for(100ms);
+    std::this_thread::sleep_for(200ms);
 
     // random ass number
     const auto k_update_time = 1s / 128;

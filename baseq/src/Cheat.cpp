@@ -129,7 +129,7 @@ static void draw_esp(const std::vector<cheats::Esp::Rect> &rects) {
 
 void Cheat::update_overlay() {
     if (!this->game_focused) return;
-    SetWindowPos(this->overlay, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
+    ::SetWindowPos(this->overlay, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
 
     auto &io = ImGui::GetIO();
     // io.MouseDrawCursor = true;
