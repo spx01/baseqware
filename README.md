@@ -19,3 +19,6 @@
 - [ ] Skybox changer + world changer (?)
 - [ ] Keyboard layout meme also via telnet and config parsing
 - [ ] Sounds with telnet
+
+currently there's a PoC jumpbug, seems to work fine
+i'll rewrite this but i'll fix it before then
